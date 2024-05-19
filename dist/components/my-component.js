@@ -1,4 +1,4 @@
-import { p as proxyCustomElement, H, h } from './p-7cc3f666.js';
+import { p as proxyCustomElement, H, h } from './p-bc093015.js';
 import { f as format } from './p-b07dd267.js';
 
 const myComponentCss = ":host{display:block}";

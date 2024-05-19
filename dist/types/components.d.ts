@@ -7,11 +7,14 @@
 import { HTMLStencilElement, JSXBase } from "./stencil-public-runtime";
 export namespace Components {
     interface GamePreviewWebComponent {
-        "game": string;
+        /**
+          * Club Id from my-club
+         */
+        "club": string;
         /**
           * Game Id from my-club
          */
-        "gameId": string;
+        "game": string;
     }
     interface MyComponent {
         /**
@@ -48,11 +51,14 @@ declare global {
 }
 declare namespace LocalJSX {
     interface GamePreviewWebComponent {
-        "game"?: string;
+        /**
+          * Club Id from my-club
+         */
+        "club"?: string;
         /**
           * Game Id from my-club
          */
-        "gameId"?: string;
+        "game"?: string;
     }
     interface MyComponent {
         /**

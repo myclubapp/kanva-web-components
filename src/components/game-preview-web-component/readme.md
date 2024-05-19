@@ -9,8 +9,8 @@
 
 | Property | Attribute | Description          | Type     | Default     |
 | -------- | --------- | -------------------- | -------- | ----------- |
-| `game`   | `game`    |                      | `string` | `undefined` |
-| `gameId` | `game-id` | Game Id from my-club | `string` | `undefined` |
+| `club`   | `club`    | Club Id from my-club | `string` | `undefined` |
+| `game`   | `game`    | Game Id from my-club | `string` | `undefined` |
 
 
 ----------------------------------------------
