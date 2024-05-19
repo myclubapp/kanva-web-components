@@ -28,7 +28,9 @@ npm-debug.log*
 .stencil
 /coverage
 /dist
+dist
 /node_modules
+node_modules
 /platforms
 /plugins
 /www
