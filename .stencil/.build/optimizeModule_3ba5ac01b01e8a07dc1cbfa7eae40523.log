@@ -1,0 +1,1 @@
+import{r as e,h as c,H as s}from"./p-c7ab4a34.js";const a=":host{display:block}";const o=a;const t=class{constructor(c){e(this,c)}render(){return c(s,{key:"e1e6089e7a7850dc5aa274156dccd46b40c10a22"},c("slot",{key:"ee89edfc1b5b2e2cf9dd9a284618490c6bd04e52"}))}};t.style=o;export{t as game_preview_web_component};
