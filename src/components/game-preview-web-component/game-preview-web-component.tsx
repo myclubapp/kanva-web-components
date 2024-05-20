@@ -167,29 +167,25 @@ export class GamePreviewWebComponent {
             <rect x="0" y="355" width="15" height="10" fill="orange" />
             <rect x="0" y="340" width="15" height="10" fill="orange" />
 
-            <text x="10" y="40" font-family="Arial" font-size="40" fill="black"  stroke="orange" stroke-width="1">{this.date}</text>
-            <text x="12" y="40" font-family="Arial" font-size="40" fill="black"  stroke="orange" stroke-width="1">{this.date}</text>
-            <text x="25" y="90" font-family="Arial" font-size="16" fill="black">{this.time} Uhr in {this.city}</text>
+            <text x="10" y="40" font-family="Impact" font-size="40" fill="black"  stroke="orange" stroke-width="1">{this.date}</text>
+            <text x="12" y="40" font-family="Impact" font-size="40" fill="black"  stroke="orange" stroke-width="1">{this.date}</text>
+            <text x="25" y="65" font-family="Impact" font-size="16" fill="black">{this.time} Uhr in {this.city}</text>
 
-            <text x="40" y="120" font-family="Arial" font-size="18" fill="orange" stroke="black">{this.teamHome}</text>
+            <text x="40" y="120" font-family="Impact" font-size="18" fill="orange" stroke="black">{this.teamHome}</text>
             <rect x="40" y="125" height="120" width="120" fill="white"></rect>
             <image x="40" y="125" height="120" width="120" href={this.teamHomeLogo} />
 
-            <text x="180" y="200" font-family="Arial" font-size="30" fill="orange" stroke="black" stroke-width="1">VS</text>
-            
+            <text x="180" y="200" font-family="Impact" font-size="30" fill="orange" stroke="black" stroke-width="1">VS</text>
 
-
-            <text x="355" y="265" font-family="Arial" font-size="18" fill="orange" stroke="black" text-anchor="end">{this.teamAway}</text>
+            <text x="355" y="265" font-family="Impact" font-size="18" fill="orange" stroke="black" text-anchor="end">{this.teamAway}</text>
             <rect x="235" y="125" height="120" width="120" fill="white"></rect>
             <image x="235" y="125" height="120" width="120" href={this.teamAwayLogo} />
 
-            <text x="25" y="370" font-family="Arial" font-size="20" fill="black" text-anchor="start">{this.liga}</text>
+            <text x="25" y="370" font-family="Impact" font-size="20" fill="black" text-anchor="start">{this.liga}</text>
             <g transform="rotate(-90 0 0)">
-              <text x="-390" y="390" font-family="Arial" font-size="40" fill="orange" stroke="black" stroke-width="1">GAMEDAY</text>
+              <text x="-390" y="390" font-family="Impact" font-size="40" fill="orange" stroke="black" stroke-width="1">GAMEDAY</text>
             </g>
           </svg>
-
-
         </slot>
         <div> {this.name}</div>
       </Host>
