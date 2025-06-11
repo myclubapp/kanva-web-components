@@ -222,7 +222,7 @@ export class GamePreview {
             {/* Teams mit größeren Logos und voller Textbreite */}
             {/* Home Team (links) */}
             <g>
-              <text x="125" y="120" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="left" font-weight="bold" filter="url(#shadow)">
+              <text x="30" y="120" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="left" font-weight="bold" filter="url(#shadow)">
                 {this.teamHome}
               </text>
               <rect x="30" y="140" width="130" height="130" rx="24" fill="#fff" filter="url(#shadow)" />
