@@ -1,6 +1,6 @@
 {
   "name": "myclub-game-preview",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "myclub-game-preview",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",

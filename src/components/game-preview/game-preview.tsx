@@ -192,7 +192,7 @@ export class GamePreview {
     const imageSrc = getAssetPath(`./assets/background-${this.theme}.png`);
     const themeStyles = this.getThemeStyles();
     // Hilfsfunktion für Textkürzung
-    const truncate = (str, n = 18) => str && str.length > n ? str.slice(0, n - 1) + '…' : str;
+    // const truncate = (str, n = 18) => str && str.length > n ? str.slice(0, n - 1) + '…' : str;
     return (
       <Host>
         <slot>
