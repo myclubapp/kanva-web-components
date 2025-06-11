@@ -6,56 +6,78 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
-    interface MyComponent {
+    interface GamePreview {
         /**
-          * The first name
+          * Club Id from my-club
          */
-        "first": string;
+        "club": string;
         /**
-          * The last name
+          * Game Id from my-club
          */
-        "last": string;
+        "game": string;
         /**
-          * The middle name
+          * Height of the preview
+          * @default '400'
          */
-        "middle": string;
+        "height": string;
+        /**
+          * Theme of the preview
+          * @default 'myclub'
+         */
+        "theme": string;
+        /**
+          * Width of the preview
+          * @default '400'
+         */
+        "width": string;
     }
 }
 declare global {
-    interface HTMLMyComponentElement extends Components.MyComponent, HTMLStencilElement {
+    interface HTMLGamePreviewElement extends Components.GamePreview, HTMLStencilElement {
     }
-    var HTMLMyComponentElement: {
-        prototype: HTMLMyComponentElement;
-        new (): HTMLMyComponentElement;
+    var HTMLGamePreviewElement: {
+        prototype: HTMLGamePreviewElement;
+        new (): HTMLGamePreviewElement;
     };
     interface HTMLElementTagNameMap {
-        "my-component": HTMLMyComponentElement;
+        "game-preview": HTMLGamePreviewElement;
     }
 }
 declare namespace LocalJSX {
-    interface MyComponent {
+    interface GamePreview {
         /**
-          * The first name
+          * Club Id from my-club
          */
-        "first"?: string;
+        "club"?: string;
         /**
-          * The last name
+          * Game Id from my-club
          */
-        "last"?: string;
+        "game"?: string;
         /**
-          * The middle name
+          * Height of the preview
+          * @default '400'
          */
-        "middle"?: string;
+        "height"?: string;
+        /**
+          * Theme of the preview
+          * @default 'myclub'
+         */
+        "theme"?: string;
+        /**
+          * Width of the preview
+          * @default '400'
+         */
+        "width"?: string;
     }
     interface IntrinsicElements {
-        "my-component": MyComponent;
+        "game-preview": GamePreview;
     }
 }
 export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
-            "my-component": LocalJSX.MyComponent & JSXBase.HTMLAttributes<HTMLMyComponentElement>;
+            "game-preview": LocalJSX.GamePreview & JSXBase.HTMLAttributes<HTMLGamePreviewElement>;
         }
     }
 }
