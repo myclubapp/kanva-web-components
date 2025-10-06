@@ -11,8 +11,7 @@
     "moduleResolution": "node",
     "module": "esnext",
     "target": "es2017",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
     "jsx": "react",
     "jsxFactory": "h"
   },

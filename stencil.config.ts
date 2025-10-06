@@ -27,7 +27,12 @@ export const config: Config = {
     {
       type: 'www',
       serviceWorker: null, // disable service workers
-
+      copy: [
+        {
+          src: 'components/game-preview/assets',
+          dest: 'assets'
+        }
+      ]
     },
   ],
   testing: {

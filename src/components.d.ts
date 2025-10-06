@@ -21,6 +21,36 @@ export namespace Components {
          */
         "height": string;
         /**
+          * Is this a home game?
+          * @default false
+         */
+        "ishomegame": boolean;
+        /**
+          * Theme of the preview
+          * @default 'myclub'
+         */
+        "theme": string;
+        /**
+          * Width of the preview
+          * @default '400'
+         */
+        "width": string;
+    }
+    interface GameResult {
+        /**
+          * Club Id from my-club
+         */
+        "club": string;
+        /**
+          * Game Id from my-club
+         */
+        "game": string;
+        /**
+          * Height of the preview
+          * @default '400'
+         */
+        "height": string;
+        /**
           * Theme of the preview
           * @default 'myclub'
          */
@@ -39,12 +69,49 @@ declare global {
         prototype: HTMLGamePreviewElement;
         new (): HTMLGamePreviewElement;
     };
+    interface HTMLGameResultElement extends Components.GameResult, HTMLStencilElement {
+    }
+    var HTMLGameResultElement: {
+        prototype: HTMLGameResultElement;
+        new (): HTMLGameResultElement;
+    };
     interface HTMLElementTagNameMap {
         "game-preview": HTMLGamePreviewElement;
+        "game-result": HTMLGameResultElement;
     }
 }
 declare namespace LocalJSX {
     interface GamePreview {
+        /**
+          * Club Id from my-club
+         */
+        "club"?: string;
+        /**
+          * Game Id from my-club
+         */
+        "game"?: string;
+        /**
+          * Height of the preview
+          * @default '400'
+         */
+        "height"?: string;
+        /**
+          * Is this a home game?
+          * @default false
+         */
+        "ishomegame"?: boolean;
+        /**
+          * Theme of the preview
+          * @default 'myclub'
+         */
+        "theme"?: string;
+        /**
+          * Width of the preview
+          * @default '400'
+         */
+        "width"?: string;
+    }
+    interface GameResult {
         /**
           * Club Id from my-club
          */
@@ -71,6 +138,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "game-preview": GamePreview;
+        "game-result": GameResult;
     }
 }
 export { LocalJSX as JSX };
@@ -78,6 +146,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "game-preview": LocalJSX.GamePreview & JSXBase.HTMLAttributes<HTMLGamePreviewElement>;
+            "game-result": LocalJSX.GameResult & JSXBase.HTMLAttributes<HTMLGameResultElement>;
         }
     }
 }

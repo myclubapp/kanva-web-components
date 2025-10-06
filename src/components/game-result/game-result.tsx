@@ -42,6 +42,7 @@ export class GameResult {
   @State() date: string;
   @State() time: string;
   @State() liga: string;
+  @State() result: string;
 
   private getThemeStyles() {
     switch (this.theme) {
@@ -49,20 +50,22 @@ export class GameResult {
         return {
           primaryColor: 'orange',
           secondaryColor: 'black',
-          backgroundColor: '#f25528'
+          backgroundColor: '#f25528',
+          backgroundImage: 'kadetten-unihockey'
         };
       case 'myclub':
         return {
           primaryColor: '#339bde',
-
           secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          backgroundImage: 'myclub'
         };
       default:
         return {
           primaryColor: '#339bde',
           secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          backgroundImage: 'myclub'
         };
     }
   }
@@ -81,7 +84,7 @@ export class GameResult {
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString
 
     let date = new Date(dateString.substr(6, 4), dateString.substr(3, 2) - 1, dateString.substr(0, 2)).toLocaleDateString('ch-DE', {
-      weekday: 'long',
+      // weekday: 'long',
       year: '2-digit',
       month: 'numeric',
       day: 'numeric',
@@ -107,6 +110,7 @@ export class GameResult {
         this.time = response.time;
         this.date = this.formatDate(response.date);
         this.liga = response.liga;
+        this.result = response.result;
       });
   }
 
@@ -188,68 +192,45 @@ export class GameResult {
   }
 
   render() {
-    // Modernes SVG-Layout mit Farbverlauf, Schatten und besserer Anordnung
-    const imageSrc = getAssetPath(`./assets/background-${this.theme}.png`);
+    // Layout basierend auf Instagram-Vorlagen
     const themeStyles = this.getThemeStyles();
-    // Hilfsfunktion für Textkürzung
-    // const truncate = (str, n = 18) => str && str.length > n ? str.slice(0, n - 1) + '…' : str;
+    const imageSrc = getAssetPath(`./assets/background-${themeStyles.backgroundImage}.png`);
+    // eslint-disable-next-line
+
     return (
       <Host>
         <slot>
           <svg width={this.width} height={this.height} viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="bg-gradient" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color={themeStyles.primaryColor} />
-                <stop offset="100%" stop-color={themeStyles.secondaryColor} />
-              </linearGradient>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25" />
-              </filter>
-            </defs>
             <rect width="400" height="400" fill="url(#bg-gradient)" />
             {/* Hintergrundbild, falls vorhanden */}
-            {this.teamHomeLogo && (
-              <image width='400' height='400' href={imageSrc} />
-            )}
-            {/* Datum */}
-            <text x="30" y="50" font-family="Montserrat, Arial, sans-serif" font-size="40" fill={themeStyles.secondaryColor} filter="url(#shadow)" font-weight="bold" stroke="#FFF" stroke-width="1">
-              {this.date}
+
+            <image width='400' height='400' href={imageSrc} />
+
+            {/* RESULT - groß und zentriert oben */}
+            <text x="10" y="390" font-family="Bebas Neue, sans-serif" font-size="150" fill="#fff" text-anchor="left" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="6" paint-order="stroke fill">
+              {this.result}
             </text>
-            {/* Uhrzeit */}
-            <text x="30" y="85" font-family="Montserrat, Arial, sans-serif" font-size="32" fill={themeStyles.secondaryColor} font-weight="bold" opacity="0.95" stroke="#FFF" stroke-width="1">
-              {this.time} Uhr
-            </text>
-            {/* Teams mit größeren Logos und voller Textbreite */}
-            {/* Home Team (links) */}
+
+            {/* Datum, Uhrzeit und Ortschaft - zweite Zeile zentriert 
+            <text x="200" y="90" font-family="Bebas Neue, sans-serif" font-size="18" fill="#fff" text-anchor="middle" font-weight="600">
+              {this.date} {this.time} {this.city}
+            </text> */}
+
+            {/* Team-Logos links unten nebeneinander */}
             <g>
-              <text x="30" y="120" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="left" font-weight="bold" filter="url(#shadow)">
-                {this.teamHome}
-              </text>
-              <rect x="30" y="140" width="130" height="130" rx="24" fill="#fff" filter="url(#shadow)" />
-              <image x="35" y="145" width="120" height="120" href={this.teamHomeLogo} />
+              {/* Home Team Logo (links) */}
+              {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+              <image x="240" y="5" width="70" height="70" href={this.teamHomeLogo} />
+
+              {/* Away Team Logo (rechts daneben) */}
+              {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+              <image x="320" y="5" width="70" height="70" href={this.teamAwayLogo} />
             </g>
-            {/* Away Team (rechts) */}
-            <g>
-              <text x="370" y="300" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="end" font-weight="bold" filter="url(#shadow)">
-                {this.teamAway}
-              </text>
-              <rect x="240" y="140" width="130" height="130" rx="24" fill="#fff" filter="url(#shadow)" />
-              <image x="245" y="145" width="120" height="120" href={this.teamAwayLogo} />
-            </g>
-            {/* VS */}
-            <text x="200" y="220" font-family="Montserrat, Arial, sans-serif" font-size="36" fill="#fff" text-anchor="middle" font-weight="bold" filter="url(#shadow)">
-              VS
+
+            {/* Presented by myclub - unten rechts */}
+            <text x="390" y="390" font-family="Bebas Neue, sans-serif" font-size="12" fill="#fff" text-anchor="end" opacity="0.7">
+              presented by myclub
             </text>
-            {/* Liga */}
-            <text x="200" y="350" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#fff" text-anchor="middle" opacity="0.9">
-              {this.liga}
-            </text>
-            {/* Ort: Stadt und Location zusammen */}
-            {(this.city || this.location) && (
-              <text x="200" y="375" font-family="Montserrat, Arial, sans-serif" font-size="13" fill="#fff" text-anchor="middle" opacity="0.7">
-                {[this.location, this.city ].filter(Boolean).join(', ')}
-              </text>
-            )}
           </svg>
         </slot>
       </Host>
