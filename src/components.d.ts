@@ -12,10 +12,6 @@ export namespace Components {
          */
         "backgroundimage": string;
         /**
-          * Club Id from my-club
-         */
-        "club": string;
-        /**
           * Game Id from my-club
          */
         "game": string;
@@ -43,6 +39,11 @@ export namespace Components {
          */
         "theme": string;
         /**
+          * CLub type
+          * @default 'swissunihockey'
+         */
+        "type": string;
+        /**
           * Width of the preview
           * @default '400'
          */
@@ -53,10 +54,6 @@ export namespace Components {
           * Background image URL. Falls back to theme-based image if not provided.
          */
         "backgroundimage": string;
-        /**
-          * Club Id from my-club
-         */
-        "club": string;
         /**
           * Game Id from my-club
          */
@@ -71,10 +68,20 @@ export namespace Components {
          */
         "height": string;
         /**
+          * Show result detail
+          * @default false
+         */
+        "showresultdetail": boolean;
+        /**
           * Theme of the preview
           * @default 'myclub'
          */
         "theme": string;
+        /**
+          * CLub type
+          * @default 'swissunihockey'
+         */
+        "type": string;
         /**
           * Width of the preview
           * @default '400'
@@ -107,10 +114,6 @@ declare namespace LocalJSX {
          */
         "backgroundimage"?: string;
         /**
-          * Club Id from my-club
-         */
-        "club"?: string;
-        /**
           * Game Id from my-club
          */
         "game"?: string;
@@ -138,6 +141,11 @@ declare namespace LocalJSX {
          */
         "theme"?: string;
         /**
+          * CLub type
+          * @default 'swissunihockey'
+         */
+        "type"?: string;
+        /**
           * Width of the preview
           * @default '400'
          */
@@ -148,10 +156,6 @@ declare namespace LocalJSX {
           * Background image URL. Falls back to theme-based image if not provided.
          */
         "backgroundimage"?: string;
-        /**
-          * Club Id from my-club
-         */
-        "club"?: string;
         /**
           * Game Id from my-club
          */
@@ -166,10 +170,20 @@ declare namespace LocalJSX {
          */
         "height"?: string;
         /**
+          * Show result detail
+          * @default false
+         */
+        "showresultdetail"?: boolean;
+        /**
           * Theme of the preview
           * @default 'myclub'
          */
         "theme"?: string;
+        /**
+          * CLub type
+          * @default 'swissunihockey'
+         */
+        "type"?: string;
         /**
           * Width of the preview
           * @default '400'

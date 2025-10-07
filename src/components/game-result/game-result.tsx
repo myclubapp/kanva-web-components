@@ -7,10 +7,11 @@ import { Component, Host, Prop, State, h, getAssetPath } from '@stencil/core';
   assetsDirs: ['assets']
 })
 export class GameResult {
+
   /**
-   * Club Id from my-club
+   * CLub type
    */
-  @Prop() club: string;
+  @Prop() type: string = 'swissunihockey';
   /**
    * Game Id from my-club
    */
@@ -35,23 +36,26 @@ export class GameResult {
    * Background image URL. Falls back to theme-based image if not provided.
    */
   @Prop() backgroundimage: string;
+  /**
+ * Show result detail
+ */
+  @Prop() showresultdetail: boolean = false;
 
   /**
    * Name of the Game
    */
   @State() name: string;
+  @State() description: string;
   @State() teamAway: string;
   @State() teamAwayLogo: string;
   @State() teamHome: string;
   @State() teamHomeLogo: string;
   @State() city: string;
   @State() location: string;
-  @State() dateTime: string;
   @State() date: string;
   @State() time: string;
-  @State() liga: string;
   @State() result: string;
-
+  @State() resultDetail: string;
   /**
    * Game 2 Attributes
    */
@@ -60,6 +64,7 @@ export class GameResult {
   @State() teamHome2: string;
   @State() teamHomeLogo2: string;
   @State() result2: string;
+  @State() resultDetail2: string;
 
 
   private getThemeStyles() {
@@ -125,8 +130,13 @@ export class GameResult {
     return this.game2;
   }
 
-  private getClubId(): string {
-    return this.club;
+
+  private getShowResultDetail(): boolean {
+    return this.showresultdetail;
+  }
+
+  private getType(): string {
+    return this.type;
   }
 
   private formatDate(dateString): string {
@@ -143,40 +153,75 @@ export class GameResult {
     return date;
   }
 
+  private extractGameId(gameId: string): string {
+    // Extrahiert die reine Nummer aus der gameId (z.B. "su-1076712" -> "1076712")
+    if (!gameId) return '';
+    const match = gameId.match(/\d+/);
+    return match ? match[0] : gameId;
+  }
+
+  private buildGraphQLQuery(gameId: string): string {
+    const query = `{
+  game(gameId: "${gameId}") {
+    date
+    time
+    location
+    city
+    teamHome
+    teamAway
+    teamHomeLogo
+    teamAwayLogo
+    result
+    resultDetail
+  }
+}`;
+    return encodeURIComponent(query);
+  }
+
   componentWillLoad() {
-    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId()}&clubId=${this.getClubId()}`)
-      // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
+    const gameId = this.extractGameId(this.getGameId());
+    const graphQLQuery = this.buildGraphQLQuery(gameId);
+
+    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery}`)
       .then((response: Response) => response.json()
       ).then(response => {
         console.log(response);
+        const game = response.data?.game;
+        if (game) {
+          this.name = game.name;
+          this.description = game.description;
+          this.teamAway = game.teamAway;
+          this.teamAwayLogo = game.teamAwayLogo;
+          this.teamHome = game.teamHome;
+          this.teamHomeLogo = game.teamHomeLogo;
+          this.city = game.city;
+          this.location = game.location;
+          this.time = game.time;
+          this.date = this.formatDate(game.date);
 
-        this.name = response.name;
-        this.teamAway = response.teamAway;
-        this.teamAwayLogo = response.teamAwayLogo;
-        this.teamHome = response.teamHome;
-        this.teamHomeLogo = response.teamHomeLogo;
-        this.city = response.city;
-        this.location = response.location;
-        this.dateTime = response.dateTime._seconds;
-        this.time = response.time;
-        this.date = this.formatDate(response.date);
-        this.liga = response.liga;
-        this.result = response.result;
+          this.result = game.result;
+          this.resultDetail = game.resultDetail;
+        }
       });
 
 
     if (this.game2 && this.game2.trim() !== '') {
-      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId2()}&clubId=${this.getClubId()}`)
-        // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
+      const gameId2 = this.extractGameId(this.getGameId2());
+      const graphQLQuery2 = this.buildGraphQLQuery(gameId2);
+
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery2}`)
         .then((response2: Response) => response2.json()
         ).then(response2 => {
-          console.log(response2 + '2nd game');
-
-          this.teamAway2 = response2.teamAway;
-          this.teamAwayLogo2 = response2.teamAwayLogo;
-          this.teamHome2 = response2.teamHome;
-          this.teamHomeLogo2 = response2.teamHomeLogo;
-          this.result2 = response2.result;
+          console.log(response2, '2nd game');
+          const game2 = response2.data?.game;
+          if (game2) {
+            this.teamAway2 = game2.teamAway;
+            this.teamAwayLogo2 = game2.teamAwayLogo;
+            this.teamHome2 = game2.teamHome;
+            this.teamHomeLogo2 = game2.teamHomeLogo;
+            this.result2 = game2.result;
+            this.resultDetail2 = game2.resultDetail;
+          }
         });
     }
 
@@ -285,6 +330,11 @@ export class GameResult {
                 <text x="10" y="390" font-family="Bebas Neue, sans-serif" font-size="150" fill="#fff" text-anchor="start" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="6" paint-order="stroke fill">
                   {this.result}
                 </text>
+                {this.getShowResultDetail() && (
+                  <text x="180" y="390" font-family="Bebas Neue, sans-serif" font-size="30" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="1" paint-order="stroke fill">
+                    {this.resultDetail}
+                  </text>
+                )}
                 {/* Team-Logos links unten nebeneinander */}
                 <g>
                   {/* Home Team Logo (links) */}
@@ -302,13 +352,18 @@ export class GameResult {
               <g>
                 {/* TWO GAMES LAYOUT */}
                 {this.game2 !== null && (
-                <g> {/* First Game */}
-                  <image x="20" y="80" width="40" height="40" href={this.teamHomeLogo} />
-                  <image x="90" y="80" width="40" height="40" href={this.teamAwayLogo} />
-                  <text x="70" y="190" font-family="Bebas Neue, sans-serif" font-size="80" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="4" paint-order="stroke fill">
-                    {this.result}
-                  </text>
-                </g>
+                  <g> {/* First Game */}
+                    <image x="20" y="80" width="40" height="40" href={this.teamHomeLogo} />
+                    <image x="90" y="80" width="40" height="40" href={this.teamAwayLogo} />
+                    <text x="70" y="190" font-family="Bebas Neue, sans-serif" font-size="80" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="4" paint-order="stroke fill">
+                      {this.result}
+                    </text>
+                    {this.getShowResultDetail() && (
+                      <text x="140" y="190" font-family="Bebas Neue, sans-serif" font-size="30" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="1" paint-order="stroke fill">
+                        {this.resultDetail}
+                      </text>
+                    )}
+                  </g>
                 )}
                 <line x1="10" y1="200" x2="140" y2="200" stroke="#fff" stroke-width="2" />
                 <g> {/* Second Game */}
@@ -317,6 +372,11 @@ export class GameResult {
                   <text x="70" y="270" font-family="Bebas Neue, sans-serif" font-size="80" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="4" paint-order="stroke fill">
                     {this.result2}
                   </text>
+                  {this.getShowResultDetail() && (
+                    <text x="140" y="235" font-family="Bebas Neue, sans-serif" font-size="30" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="1" paint-order="stroke fill">
+                      {this.resultDetail2}
+                    </text>
+                  )}
                 </g>
               </g>
             )}

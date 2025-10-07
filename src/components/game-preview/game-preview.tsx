@@ -8,9 +8,9 @@ import { Component, Host, Prop, State, h, getAssetPath } from '@stencil/core';
 })
 export class GamePreview {
   /**
-   * Club Id from my-club
+   * CLub type
    */
-  @Prop() club: string;
+  @Prop() type: string = 'swissunihockey';
   /**
    * Game Id from my-club
    */
@@ -48,6 +48,7 @@ export class GamePreview {
    * Name of the Game
    */
   @State() name: string;
+  @State() description: string;
   @State() teamAway: string;
   @State() teamAwayLogo: string;
   @State() teamHome: string;
@@ -61,7 +62,7 @@ export class GamePreview {
   @State() dateTime: string;
   @State() date: string;
   @State() time: string;
-  @State() liga: string;
+
 
   private getThemeStyles() {
     switch (this.theme) {
@@ -130,8 +131,8 @@ export class GamePreview {
     return this.game3 || '';
   }
 
-  private getClubId(): string {
-    return this.club;
+  private getType(): string {
+    return this.type;
   }
 
   private getIsHomeGame(): boolean {
@@ -152,45 +153,86 @@ export class GamePreview {
     return date;
   }
 
+  private extractGameId(gameId: string): string {
+    // Extrahiert die reine Nummer aus der gameId (z.B. "su-1076712" -> "1076712")
+    if (!gameId) return '';
+    const match = gameId.match(/\d+/);
+    return match ? match[0] : gameId;
+  }
+
+  private buildGraphQLQuery(gameId: string): string {
+    const query = `{
+  game(gameId: "${gameId}") {
+    date
+    time
+    location
+    city
+    teamHome
+    teamAway
+    teamHomeLogo
+    teamAwayLogo
+    result
+    resultDetail
+  }
+}`;
+    return encodeURIComponent(query);
+  }
+
   componentWillLoad() {
     // console.log('ishomegame value:', this.ishomegame, 'type:', typeof this.ishomegame);
-    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId()}&clubId=${this.getClubId()}`)
-      // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
+    const gameId = this.extractGameId(this.getGameId());
+    const graphQLQuery = this.buildGraphQLQuery(gameId);
+    
+    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery}`)
       .then((response: Response) => response.json()
       ).then(response => {
         console.log(response);
+        const game = response.data?.game;
+        if (game) {
+          this.name = game.name;
+          this.teamAway = game.teamAway;
+          this.teamAwayLogo = game.teamAwayLogo;
+          this.teamHome = game.teamHome;
+          this.teamHomeLogo = game.teamHomeLogo;
+          this.city = game.city;
+          this.location = game.location;
+          this.time = game.time;
+          this.date = this.formatDate(game.date);
 
-        this.name = response.name;
-        this.teamAway = response.teamAway;
-        this.teamAwayLogo = response.teamAwayLogo;
-        this.teamHome = response.teamHome;
-        this.teamHomeLogo = response.teamHomeLogo;
-        this.city = response.city;
-        this.location = response.location;
-        this.dateTime = response.dateTime._seconds;
-        this.time = response.time;
-        this.date = this.formatDate(response.date);
-        this.liga = response.liga;
+        }
       });
 
-    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId2()}&clubId=${this.getClubId()}`)
-      // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
-      .then((response2: Response) => response2.json()
-      ).then(response2 => {
-        console.log(response2);
-        this.teamAwayLogo2 = response2.teamAwayLogo;
-        this.teamHomeLogo2 = response2.teamHomeLogo;
+    if (this.game2 && this.game2.trim() !== '') {
+      const gameId2 = this.extractGameId(this.getGameId2());
+      const graphQLQuery2 = this.buildGraphQLQuery(gameId2);
+      
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery2}`)
+        .then((response2: Response) => response2.json()
+        ).then(response2 => {
+          console.log(response2);
+          const game2 = response2.data?.game;
+          if (game2) {
+            this.teamAwayLogo2 = game2.teamAwayLogo;
+            this.teamHomeLogo2 = game2.teamHomeLogo;
+          }
+        });
+    }
 
-      });
-
-    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId3()}&clubId=${this.getClubId()}`)
-      // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
-      .then((response3: Response) => response3.json()
-      ).then(response3 => {
-        console.log(response3);
-        this.teamAwayLogo3 = response3.teamAwayLogo;
-        this.teamHomeLogo3 = response3.teamHomeLogo;
-      });
+    if (this.game3 && this.game3.trim() !== '') {
+      const gameId3 = this.extractGameId(this.getGameId3());
+      const graphQLQuery3 = this.buildGraphQLQuery(gameId3);
+      
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery3}`)
+        .then((response3: Response) => response3.json()
+        ).then(response3 => {
+          console.log(response3);
+          const game3 = response3.data?.game;
+          if (game3) {
+            this.teamAwayLogo3 = game3.teamAwayLogo;
+            this.teamHomeLogo3 = game3.teamHomeLogo;
+          }
+        });
+    }
 
   }
 
@@ -298,7 +340,7 @@ export class GamePreview {
 
             {/* Datum, Uhrzeit und Ortschaft - zweite Zeile zentriert */}
             <text x="200" y="90" font-family="Bebas Neue, sans-serif" font-size="18" fill="#fff" text-anchor="middle" font-weight="600">
-              {this.date} {this.time} {this.city}
+              {this.date} {this.time} {this.location}
             </text>
 
 
