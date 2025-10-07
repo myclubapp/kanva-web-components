@@ -24,6 +24,10 @@ export namespace Components {
          */
         "game2": string;
         /**
+          * Game Id from my-club for 3rd game
+         */
+        "game3": string;
+        /**
           * Height of the preview
           * @default '400'
          */
@@ -114,6 +118,10 @@ declare namespace LocalJSX {
           * Game Id from my-club for 2nd game
          */
         "game2"?: string;
+        /**
+          * Game Id from my-club for 3rd game
+         */
+        "game3"?: string;
         /**
           * Height of the preview
           * @default '400'

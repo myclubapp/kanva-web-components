@@ -20,6 +20,10 @@ export class GamePreview {
    */
   @Prop() game2: string;
   /**
+   * Game Id from my-club for 3rd game
+   */
+  @Prop() game3: string;
+  /**
    * Width of the preview
    */
   @Prop() width: string = '400';
@@ -50,6 +54,8 @@ export class GamePreview {
   @State() teamHomeLogo: string;
   @State() teamAwayLogo2: string;
   @State() teamHomeLogo2: string;
+  @State() teamAwayLogo3: string;
+  @State() teamHomeLogo3: string;
   @State() city: string;
   @State() location: string;
   @State() dateTime: string;
@@ -120,6 +126,10 @@ export class GamePreview {
     return this.game2 || '';
   }
 
+  private getGameId3(): string {
+    return this.game3 || '';
+  }
+
   private getClubId(): string {
     return this.club;
   }
@@ -168,12 +178,18 @@ export class GamePreview {
       .then((response2: Response) => response2.json()
       ).then(response2 => {
         console.log(response2);
-
-
         this.teamAwayLogo2 = response2.teamAwayLogo;
-
         this.teamHomeLogo2 = response2.teamHomeLogo;
 
+      });
+
+    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId3()}&clubId=${this.getClubId()}`)
+      // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
+      .then((response3: Response) => response3.json()
+      ).then(response3 => {
+        console.log(response3);
+        this.teamAwayLogo3 = response3.teamAwayLogo;
+        this.teamHomeLogo3 = response3.teamHomeLogo;
       });
 
   }
@@ -285,21 +301,22 @@ export class GamePreview {
               {this.date} {this.time} {this.city}
             </text>
 
-            {/* Multi GAME Modus - Team-Logos links unten nebeneinander Spiel 1 oben */}
-            {(this.game2 && this.game2.trim() !== '') && (
+
+            {/* 3 Multi GAME Modus - Team-Logos links unten  Spiel 1 oben */}
+            {(this.game3 && this.game3.trim() !== '') && (
               <g>
                 {/* Home Team Logo (links) */}
                 {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo} />
+                <image x="10" y="165" width="70" height="70" href={this.teamHomeLogo} />
 
                 {/* Away Team Logo (rechts daneben) */}
                 {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo} />
+                <image x="90" y="165" width="70" height="70" href={this.teamAwayLogo} />
               </g>
             )}
 
-            {/* Multi GAME ModusTeam-Logos links unten nebeneinander Spiel 2 unten*/}
-            {(this.game2 && this.game2.trim() !== '') && (
+            {/* 3 Multi GAME ModusTeam-Logos links unten Spiel 2 mitte*/}
+            {(this.game3 && this.game3.trim() !== '') && (
               <g>
                 {/* Home Team Logo (links) */}
                 {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
@@ -310,9 +327,51 @@ export class GamePreview {
                 <image x="90" y="245" width="70" height="70" href={this.teamAwayLogo2} />
               </g>
             )}
+            {/* 3 Multi GAME ModusTeam-Logos links unten Spiel 3 unten*/}
+            {(this.game3 && this.game3.trim() !== '') && (
+              <g>
+                {/* Home Team Logo (links) */}
+                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo3} />
+
+                {/* Away Team Logo (rechts daneben) */}
+                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo3} />
+              </g>
+            )}
+
+
+
+            {/* 2 Multi GAME Modus - Team-Logos links unten  Spiel 1 oben */}
+            {(this.game2 && this.game2.trim() !== '') && (!this.game3 || this.game3.trim() === '') && (
+              <g>
+                {/* Home Team Logo (links) */}
+                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="10" y="245" width="70" height="70" href={this.teamHomeLogo} />
+
+                {/* Away Team Logo (rechts daneben) */}
+                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="90" y="245" width="70" height="70" href={this.teamAwayLogo} />
+              </g>
+            )}
+
+            {/* 2 Multi GAME ModusTeam-Logos links unten Spiel 2 unten*/}
+            {(this.game2 && this.game2.trim() !== '') && (!this.game3 || this.game3.trim() === '') && (
+              <g>
+                {/* Home Team Logo (links) */}
+                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo2} />
+
+                {/* Away Team Logo (rechts daneben) */}
+                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo2} />
+              </g>
+            )}
+
+
 
             {/* SINGLE GAME Modus - Team-Logos links unten nebeneinander */}
-            {(!this.game2 || this.game2.trim() === '') && (
+            {(!this.game2 || this.game2.trim() === '') && (!this.game3 || this.game3.trim() === '') && (
               <g>
                 {/* Home Team Logo (links) */}
                 {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
