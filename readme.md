@@ -2,21 +2,130 @@
 
 # myclub Game Preview & Game Results
 
+Web Components for displaying game previews and results for myclub sports events. Built with StencilJS.
+
+## Components
+
+### `<game-preview>`
+
+Displays an upcoming game with team logos, date, time, location and theme-based styling.
+
+#### Properties
+
+| Property          | Attribute         | Description                                                                          | Type      | Default     |
+| ----------------- | ----------------- | ------------------------------------------------------------------------------------ | --------- | ----------- |
+| `club`            | `club`            | Club Id from my-club                                                                 | `string`  | `undefined` |
+| `game`            | `game`            | Game Id from my-club                                                                 | `string`  | `undefined` |
+| `width`           | `width`           | Width of the preview                                                                 | `string`  | `'400'`     |
+| `height`          | `height`          | Height of the preview                                                                | `string`  | `'400'`     |
+| `theme`           | `theme`           | Theme of the preview (controls colors only)                                          | `string`  | `'myclub'`  |
+| `backgroundimage` | `backgroundimage` | Background image name (without extension). Falls back to theme name if not provided. | `string`  | `undefined` |
+| `ishomegame`      | `ishomegame`      | Is this a home game?                                                                 | `boolean` | `false`     |
+
+#### Supported Themes
+
+Themes control color schemes only. Background images are managed separately via the `backgroundimage` parameter.
+
+- `myclub` / `myclub-light` - Primary: #339bde, Secondary: #795deb
+- `myclub-dark` - Primary: #795deb, Secondary: #339bde (dark background)
+- `light` - Primary: #339bde, Secondary: #795deb
+- `dark` - Primary: #795deb, Secondary: #339bde (dark background)
+- `kadetten-unihockey` - Primary: orange, Secondary: black
+
+### `<game-result>`
+
+Displays the final result of a completed game with score and theme-based styling.
+
+#### Properties
+
+| Property          | Attribute         | Description                                                                          | Type     | Default     |
+| ----------------- | ----------------- | ------------------------------------------------------------------------------------ | -------- | ----------- |
+| `club`            | `club`            | Club Id from my-club                                                                 | `string` | `undefined` |
+| `game`            | `game`            | Game Id from my-club                                                                 | `string` | `undefined` |
+| `width`           | `width`           | Width of the preview                                                                 | `string` | `'400'`     |
+| `height`          | `height`          | Height of the preview                                                                | `string` | `'400'`     |
+| `theme`           | `theme`           | Theme of the preview (controls colors only)                                          | `string` | `'myclub'`  |
+| `backgroundimage` | `backgroundimage` | Background image name (without extension). Falls back to theme name if not provided. | `string` | `undefined` |
+
+## Installation
+
 ```html
 <!doctype html>
 <html dir="ltr" lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
-  <title>myclub | the next generation - Game Preview Playground</title>
-  <script type="module" src="/build/create-game-preview.esm.js"></script>
-  <script nomodule="" src="/build/create-game-preview.js"></script>
+  <title>myclub Game Review und Results</title>
+  <script type="module" src="/build/myclub-game-preview.esm.js"></script>
+  <script nomodule src="/build/myclub-game-preview.js"></script>
 </head>
-
-<body> 
-  <game-preview club="su-452800" game="su-1049868"></game-preview>  
+<body>
+  <!-- Your components here -->
 </body>
-
 </html>
+```
+
+## Usage Examples
+
+### Away Game Preview (default background)
+```html
+<!-- Uses background-kadetten-unihockey.png automatically -->
+<game-preview
+  club="su-452800"
+  ishomegame="false"
+  game="su-1076760"
+  width="400"
+  height="400"
+  theme="kadetten-unihockey">
+</game-preview>
+```
+
+### Home Game Preview (custom background)
+```html
+<!-- Uses myclub-dark colors with background-custom.png -->
+<game-preview
+  club="su-452800"
+  ishomegame="true"
+  game="su-1076776"
+  width="400"
+  height="400"
+  theme="myclub-dark"
+  backgroundimage="custom">
+</game-preview>
+```
+
+### Game Result
+```html
+<!-- Uses background-kadetten-unihockey.png automatically -->
+<game-result
+  club="su-452800"
+  game="su-1072055"
+  width="400"
+  height="400"
+  theme="kadetten-unihockey">
+</game-result>
+```
+
+### Custom Background Image
+```html
+<!-- Uses background-my-special-background.png with light theme colors -->
+<game-preview
+  club="su-452800"
+  game="su-1076760"
+  theme="light"
+  backgroundimage="my-special-background">
+</game-preview>
+```
+
+## Development
+
+```bash
+npm install
+npm start
+```
+
+## Build
+
+```bash
+npm run build
 ```

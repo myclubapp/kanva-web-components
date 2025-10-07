@@ -30,7 +30,11 @@ export const config: Config = {
       copy: [
         {
           src: 'components/game-preview/assets',
-          dest: 'assets'
+          dest: 'build'
+        },
+        {
+          src: 'components/game-result/assets',
+          dest: 'build'
         }
       ]
     },

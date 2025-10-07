@@ -7,13 +7,14 @@
 
 ## Properties
 
-| Property | Attribute | Description           | Type     | Default     |
-| -------- | --------- | --------------------- | -------- | ----------- |
-| `club`   | `club`    | Club Id from my-club  | `string` | `undefined` |
-| `game`   | `game`    | Game Id from my-club  | `string` | `undefined` |
-| `height` | `height`  | Height of the preview | `string` | `'400'`     |
-| `theme`  | `theme`   | Theme of the preview  | `string` | `'myclub'`  |
-| `width`  | `width`   | Width of the preview  | `string` | `'400'`     |
+| Property          | Attribute         | Description                                                            | Type     | Default     |
+| ----------------- | ----------------- | ---------------------------------------------------------------------- | -------- | ----------- |
+| `backgroundimage` | `backgroundimage` | Background image URL. Falls back to theme-based image if not provided. | `string` | `undefined` |
+| `club`            | `club`            | Club Id from my-club                                                   | `string` | `undefined` |
+| `game`            | `game`            | Game Id from my-club                                                   | `string` | `undefined` |
+| `height`          | `height`          | Height of the preview                                                  | `string` | `'400'`     |
+| `theme`           | `theme`           | Theme of the preview                                                   | `string` | `'myclub'`  |
+| `width`           | `width`           | Width of the preview                                                   | `string` | `'400'`     |
 
 
 ----------------------------------------------

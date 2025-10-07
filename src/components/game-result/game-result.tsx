@@ -27,6 +27,10 @@ export class GameResult {
    * Theme of the preview
    */
   @Prop() theme: string = 'myclub';
+  /**
+   * Background image URL. Falls back to theme-based image if not provided.
+   */
+  @Prop() backgroundimage: string;
 
   /**
    * Name of the Game
@@ -50,23 +54,52 @@ export class GameResult {
         return {
           primaryColor: 'orange',
           secondaryColor: 'black',
-          backgroundColor: '#f25528',
-          backgroundImage: 'kadetten-unihockey'
+          backgroundColor: '#f25528'
         };
-      case 'myclub':
+      case 'myclub-light':
         return {
           primaryColor: '#339bde',
           secondaryColor: '#795deb',
-          backgroundColor: '#ffffff',
-          backgroundImage: 'myclub'
+          backgroundColor: '#ffffff'
+        };
+      case 'myclub-dark':
+        return {
+          primaryColor: '#795deb',
+          secondaryColor: '#339bde',
+          backgroundColor: '#1a1a1a'
+        };
+      case 'light':
+        return {
+          primaryColor: '#339bde',
+          secondaryColor: '#795deb',
+          backgroundColor: '#ffffff'
+        };
+      case 'dark':
+        return {
+          primaryColor: '#795deb',
+          secondaryColor: '#339bde',
+          backgroundColor: '#1a1a1a'
         };
       default:
         return {
           primaryColor: '#339bde',
           secondaryColor: '#795deb',
-          backgroundColor: '#ffffff',
-          backgroundImage: 'myclub'
+          backgroundColor: '#ffffff'
         };
+    }
+  }
+
+  private getDefaultBackgroundImage(): string {
+    switch (this.theme) {
+      case 'kadetten-unihockey':
+        return 'kadetten-unihockey';
+      case 'myclub':
+      case 'myclub-light':
+      case 'myclub-dark':
+      case 'light':
+      case 'dark':
+      default:
+        return 'myclub';
     }
   }
 
@@ -194,7 +227,10 @@ export class GameResult {
   render() {
     // Layout basierend auf Instagram-Vorlagen
     const themeStyles = this.getThemeStyles();
-    const imageSrc = getAssetPath(`./assets/background-${themeStyles.backgroundImage}.png`);
+    // Entweder URL (http/https oder data:image) oder theme-basiertes Bild
+    const imageSrc = this.backgroundimage && (this.backgroundimage.startsWith('http') || this.backgroundimage.startsWith('data:image/'))
+      ? this.backgroundimage
+      : getAssetPath(`background-${this.getDefaultBackgroundImage()}.png`);
     // eslint-disable-next-line
 
     return (

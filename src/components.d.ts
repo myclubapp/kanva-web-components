@@ -8,6 +8,10 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface GamePreview {
         /**
+          * Background image URL. Falls back to theme-based image if not provided.
+         */
+        "backgroundimage": string;
+        /**
           * Club Id from my-club
          */
         "club": string;
@@ -37,6 +41,10 @@ export namespace Components {
         "width": string;
     }
     interface GameResult {
+        /**
+          * Background image URL. Falls back to theme-based image if not provided.
+         */
+        "backgroundimage": string;
         /**
           * Club Id from my-club
          */
@@ -83,6 +91,10 @@ declare global {
 declare namespace LocalJSX {
     interface GamePreview {
         /**
+          * Background image URL. Falls back to theme-based image if not provided.
+         */
+        "backgroundimage"?: string;
+        /**
           * Club Id from my-club
          */
         "club"?: string;
@@ -112,6 +124,10 @@ declare namespace LocalJSX {
         "width"?: string;
     }
     interface GameResult {
+        /**
+          * Background image URL. Falls back to theme-based image if not provided.
+         */
+        "backgroundimage"?: string;
         /**
           * Club Id from my-club
          */
