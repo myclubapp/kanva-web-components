@@ -7,7 +7,6 @@ export const config: Config = {
       type: 'dist',
       esmLoaderPath: '../loader',
       dir: 'dist',
-
     },
     {
       type: 'dist-custom-elements',
@@ -15,7 +14,12 @@ export const config: Config = {
       externalRuntime: false,
       copy: [
         {
-          src: '**/*.{jpg,png}',
+          src: 'components/game-preview/assets',
+          dest: 'dist/components/assets',
+          warn: true,
+        },
+        {
+          src: 'components/game-result/assets',
           dest: 'dist/components/assets',
           warn: true,
         }

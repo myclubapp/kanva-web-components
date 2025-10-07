@@ -230,7 +230,7 @@ export class GameResult {
     // Entweder URL (http/https oder data:image) oder theme-basiertes Bild
     const imageSrc = this.backgroundimage && (this.backgroundimage.startsWith('http') || this.backgroundimage.startsWith('data:image/'))
       ? this.backgroundimage
-      : getAssetPath(`background-${this.getDefaultBackgroundImage()}.png`);
+      : getAssetPath(`./assets/background-${this.getDefaultBackgroundImage()}.png`);
     // eslint-disable-next-line
 
     return (
