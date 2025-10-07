@@ -99,7 +99,8 @@ Displays the final result of a completed game with score and theme-based styling
 <!-- Uses background-kadetten-unihockey.png automatically -->
 <game-result
   club="su-452800"
-  game="su-1072055"
+  game="su-1076709"
+  game-2="su-1076712"
   width="400"
   height="400"
   theme="kadetten-unihockey">
