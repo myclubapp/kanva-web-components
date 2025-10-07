@@ -16,6 +16,10 @@ export class GamePreview {
    */
   @Prop() game: string;
   /**
+   * Game Id from my-club for 2nd game
+   */
+  @Prop() game2: string;
+  /**
    * Width of the preview
    */
   @Prop() width: string = '400';
@@ -44,6 +48,8 @@ export class GamePreview {
   @State() teamAwayLogo: string;
   @State() teamHome: string;
   @State() teamHomeLogo: string;
+  @State() teamAwayLogo2: string;
+  @State() teamHomeLogo2: string;
   @State() city: string;
   @State() location: string;
   @State() dateTime: string;
@@ -110,6 +116,10 @@ export class GamePreview {
     return this.game;
   }
 
+  private getGameId2(): string {
+    return this.game2 || '';
+  }
+
   private getClubId(): string {
     return this.club;
   }
@@ -152,6 +162,20 @@ export class GamePreview {
         this.date = this.formatDate(response.date);
         this.liga = response.liga;
       });
+
+    fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=${this.getGameId2()}&clubId=${this.getClubId()}`)
+      // fetch("https://europe-west6-myclubmanagement.cloudfunctions.net/gamePreview?gameId=su-1005184&clubId=su-452800")
+      .then((response2: Response) => response2.json()
+      ).then(response2 => {
+        console.log(response2);
+
+
+        this.teamAwayLogo2 = response2.teamAwayLogo;
+
+        this.teamHomeLogo2 = response2.teamHomeLogo;
+
+      });
+
   }
 
   componentDidLoad() {
@@ -261,16 +285,44 @@ export class GamePreview {
               {this.date} {this.time} {this.city}
             </text>
 
-            {/* Team-Logos links unten nebeneinander */}
-            <g>
-              {/* Home Team Logo (links) */}
-              {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-              <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo} />
+            {/* Multi GAME Modus - Team-Logos links unten nebeneinander Spiel 1 oben */}
+            {(this.game2 && this.game2.trim() !== '') && (
+              <g>
+                {/* Home Team Logo (links) */}
+                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo} />
 
-              {/* Away Team Logo (rechts daneben) */}
-              {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-              <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo} />
-            </g>
+                {/* Away Team Logo (rechts daneben) */}
+                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo} />
+              </g>
+            )}
+
+            {/* Multi GAME ModusTeam-Logos links unten nebeneinander Spiel 2 unten*/}
+            {(this.game2 && this.game2.trim() !== '') && (
+              <g>
+                {/* Home Team Logo (links) */}
+                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="10" y="245" width="70" height="70" href={this.teamHomeLogo2} />
+
+                {/* Away Team Logo (rechts daneben) */}
+                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="90" y="245" width="70" height="70" href={this.teamAwayLogo2} />
+              </g>
+            )}
+
+            {/* SINGLE GAME Modus - Team-Logos links unten nebeneinander */}
+            {(!this.game2 || this.game2.trim() === '') && (
+              <g>
+                {/* Home Team Logo (links) */}
+                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo} />
+
+                {/* Away Team Logo (rechts daneben) */}
+                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo} />
+              </g>
+            )}
 
             {/* Presented by myclub - unten rechts */}
             <text x="390" y="390" font-family="Bebas Neue, sans-serif" font-size="12" fill="#fff" text-anchor="end" opacity="0.7">
