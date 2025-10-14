@@ -10,7 +10,7 @@ export class GamePreview {
   /**
    * CLub type
    */
-  @Prop() type: string = 'swissunihockey';
+  @Prop() type: string = 'swissunihockey'; // swissunihockey, swissvolley
   /**
    * Game Id from my-club
    */
@@ -24,13 +24,17 @@ export class GamePreview {
    */
   @Prop() game3: string;
   /**
-   * Width of the preview
-   */
-  @Prop() width: string = '400';
+ * Is this a home game?
+ */
+  @Prop() ishomegame: boolean = false;
+  /**
+ * Width of the preview
+ */
+  @Prop() width: string = '1080';
   /**
    * Height of the preview
    */
-  @Prop() height: string = '400';
+  @Prop() height: string = '1350';
   /**
    * Theme of the preview
    */
@@ -40,9 +44,20 @@ export class GamePreview {
    */
   @Prop() backgroundimage: string;
   /**
-   * Is this a home game?
+   * Blur of the preview
    */
-  @Prop() ishomegame: boolean = false;
+  @Prop() imageblur: string = ''; // light, medium, strong
+
+  /**
+   * Team Id (used for type 'swissvolley' and 'swisshandball' only)
+   */
+  @Prop() team: string;
+
+  /**
+   * Club Id (used for type 'swisshandball' only)
+   */
+  @Prop() club: string;
+
 
   /**
    * Name of the Game
@@ -63,57 +78,15 @@ export class GamePreview {
   @State() date: string;
   @State() time: string;
 
-
-  private getThemeStyles() {
-    switch (this.theme) {
-      case 'kadetten-unihockey':
-        return {
-          primaryColor: 'orange',
-          secondaryColor: 'black',
-          backgroundColor: '#f25528'
-        };
-      case 'myclub-light':
-        return {
-          primaryColor: '#339bde',
-          secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
-        };
-      case 'myclub-dark':
-        return {
-          primaryColor: '#795deb',
-          secondaryColor: '#339bde',
-          backgroundColor: '#1a1a1a'
-        };
-      case 'light':
-        return {
-          primaryColor: '#339bde',
-          secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
-        };
-      case 'dark':
-        return {
-          primaryColor: '#795deb',
-          secondaryColor: '#339bde',
-          backgroundColor: '#1a1a1a'
-        };
-      default:
-        return {
-          primaryColor: '#339bde',
-          secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
-        };
-    }
-  }
-
   private getDefaultBackgroundImage(): string {
     switch (this.theme) {
       case 'kadetten-unihockey':
         return 'kadetten-unihockey';
-      case 'myclub':
       case 'myclub-light':
+        return 'myclub-light';
       case 'myclub-dark':
-      case 'light':
-      case 'dark':
+        return 'myclub-dark';
+      case 'myclub':
       default:
         return 'myclub';
     }
@@ -131,6 +104,18 @@ export class GamePreview {
     return this.game3 || '';
   }
 
+  private getTeamId(): string {
+    return this.team;
+  }
+
+  private getClubId(): string {
+    return this.club;
+  }
+
+  private getImageBlur(): string {
+    return this.imageblur;
+  }
+
   private getType(): string {
     return this.type;
   }
@@ -140,6 +125,7 @@ export class GamePreview {
   }
 
   private formatDate(dateString): string {
+    console.log(dateString);
     // 	"15.05.2022"
 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString
@@ -178,17 +164,163 @@ export class GamePreview {
     return encodeURIComponent(query);
   }
 
+  private buildSwissVolleyTeamGamesQuery(teamId: string): string {
+    const query = `{
+  games(teamId: "${teamId}") {
+    id
+    date
+    time
+    location
+    city
+    teamHome
+    teamAway
+    teamHomeLogo
+    teamAwayLogo
+    result
+    resultDetail
+  }
+}`;
+    return encodeURIComponent(query);
+  }
+
+  private buildSwissHandballTeamClubGamesQuery(teamId: string, clubId: string): string {
+    const query = `{
+  games(teamId: "${teamId}", clubId: "${clubId}") {
+    id
+    date
+    time
+    location
+    city
+    teamHome
+    teamAway
+    teamHomeLogo
+    teamAwayLogo
+    result
+    resultDetail
+  }
+}`;
+    return encodeURIComponent(query);
+  }
+
+  private parseDateTime(dateStr: string, timeStr: string): Date {
+    if (!dateStr) return new Date(0);
+    const day = parseInt(dateStr.substr(0, 2), 10);
+    const month = parseInt(dateStr.substr(3, 2), 10) - 1;
+    const year = parseInt(dateStr.substr(6, 4), 10);
+    const [hoursStr, minutesStr] = (timeStr || '00:00').split(/[:.]/);
+    const hours = parseInt(hoursStr || '0', 10);
+    const minutes = parseInt(minutesStr || '0', 10);
+    return new Date(year, month, day, hours, minutes);
+  }
+
+  // Choose next upcoming game for preview; if none upcoming, fallback to last most recent
+  private selectSwissvolleyPreviewGame(games: any[]): any | null {
+    if (!Array.isArray(games) || games.length === 0) return null;
+    const now = new Date();
+    const withDate = games.map(g => ({
+      item: g,
+      dt: this.parseDateTime(g.date, g.time)
+    }));
+    const future = withDate.filter(x => x.dt.getTime() >= now.getTime());
+    const chosen = (future.length > 0
+      ? future.sort((a, b) => a.dt.getTime() - b.dt.getTime())[0]
+      : withDate.sort((a, b) => b.dt.getTime() - a.dt.getTime())[0]);
+    return chosen?.item || null;
+  }
+
   componentWillLoad() {
-    // console.log('ishomegame value:', this.ishomegame, 'type:', typeof this.ishomegame);
+    // swisshandball uses team+club-based games list
+    if (this.getType() === 'swisshandball' && this.getTeamId() && this.getClubId()) {
+      const teamClubQuery = this.buildSwissHandballTeamClubGamesQuery(this.getTeamId(), this.getClubId());
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/swisshandball?query=${teamClubQuery}`)
+        .then((response: Response) => response.json())
+        .then(response => {
+          // console.log(response);
+          const games = response.data?.games || [];
+          const byId = (id: string) => {
+            const targetId = this.extractGameId(id);
+            return games.find(g => this.extractGameId(String(g.id)) === targetId);
+          };
+          const primary = (this.game && this.game.trim() !== '') ? byId(this.game) : this.selectSwissvolleyPreviewGame(games);
+          if (primary) {
+            this.teamAway = primary.teamAway;
+            this.teamAwayLogo = primary.teamAwayLogo;
+            this.teamHome = primary.teamHome;
+            this.teamHomeLogo = primary.teamHomeLogo;
+            this.city = primary.city;
+            this.location = primary.location;
+            this.time = primary.time;
+            this.date = this.formatDate(primary.date);
+          }
+          if (this.game2 && this.game2.trim() !== '') {
+            const g2 = byId(this.game2);
+            if (g2) {
+              this.teamAwayLogo2 = g2.teamAwayLogo;
+              this.teamHomeLogo2 = g2.teamHomeLogo;
+            }
+          }
+          if (this.game3 && this.game3.trim() !== '') {
+            const g3 = byId(this.game3);
+            if (g3) {
+              this.teamAwayLogo3 = g3.teamAwayLogo;
+              this.teamHomeLogo3 = g3.teamHomeLogo;
+            }
+          }
+        });
+      return;
+    }
+
+    // swissvolley uses team-based games list
+    if (this.getType() === 'swissvolley' && this.getTeamId()) {
+      const teamQuery = this.buildSwissVolleyTeamGamesQuery(this.getTeamId());
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/swissvolley?query=${teamQuery}`)
+        .then((response: Response) => response.json())
+        .then(response => {
+          // console.log(response);
+          const games = response.data?.games || [];
+          const byId = (id: string) => {
+            const targetId = this.extractGameId(id);
+            return games.find(g => this.extractGameId(String(g.id)) === targetId);
+          };
+          const primary = (this.game && this.game.trim() !== '') ? byId(this.game) : this.selectSwissvolleyPreviewGame(games);
+          if (primary) {
+            this.teamAway = primary.teamAway;
+            this.teamAwayLogo = primary.teamAwayLogo;
+            this.teamHome = primary.teamHome;
+            this.teamHomeLogo = primary.teamHomeLogo;
+            this.city = primary.city;
+            this.location = primary.location;
+            this.time = primary.time;
+            this.date = this.formatDate(primary.date);
+          }
+          if (this.game2 && this.game2.trim() !== '') {
+            const g2 = byId(this.game2);
+            if (g2) {
+              this.teamAwayLogo2 = g2.teamAwayLogo;
+              this.teamHomeLogo2 = g2.teamHomeLogo;
+            }
+          }
+          if (this.game3 && this.game3.trim() !== '') {
+            const g3 = byId(this.game3);
+            if (g3) {
+              this.teamAwayLogo3 = g3.teamAwayLogo;
+              this.teamHomeLogo3 = g3.teamHomeLogo;
+            }
+          }
+        });
+      return;
+    }
+
+    // default flow (e.g., swissunihockey): fetch by gameId and optional game2/game3
     const gameId = this.extractGameId(this.getGameId());
     const graphQLQuery = this.buildGraphQLQuery(gameId);
-    
+
     fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery}`)
       .then((response: Response) => response.json()
       ).then(response => {
-        console.log(response);
         const game = response.data?.game;
         if (game) {
+          console.log(game);
           this.name = game.name;
           this.teamAway = game.teamAway;
           this.teamAwayLogo = game.teamAwayLogo;
@@ -205,13 +337,14 @@ export class GamePreview {
     if (this.game2 && this.game2.trim() !== '') {
       const gameId2 = this.extractGameId(this.getGameId2());
       const graphQLQuery2 = this.buildGraphQLQuery(gameId2);
-      
+
       fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery2}`)
         .then((response2: Response) => response2.json()
         ).then(response2 => {
-          console.log(response2);
+          // console.log(response2);
           const game2 = response2.data?.game;
           if (game2) {
+            console.log(game2);
             this.teamAwayLogo2 = game2.teamAwayLogo;
             this.teamHomeLogo2 = game2.teamHomeLogo;
           }
@@ -221,13 +354,14 @@ export class GamePreview {
     if (this.game3 && this.game3.trim() !== '') {
       const gameId3 = this.extractGameId(this.getGameId3());
       const graphQLQuery3 = this.buildGraphQLQuery(gameId3);
-      
+
       fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery3}`)
         .then((response3: Response) => response3.json()
         ).then(response3 => {
-          console.log(response3);
+          // console.log(response3);
           const game3 = response3.data?.game;
           if (game3) {
+            console.log(game3);
             this.teamAwayLogo3 = game3.teamAwayLogo;
             this.teamHomeLogo3 = game3.teamHomeLogo;
           }
@@ -314,8 +448,6 @@ export class GamePreview {
   }
 
   render() {
-    // Layout basierend auf Instagram-Vorlagen
-    const themeStyles = this.getThemeStyles();
     // Entweder URL (http/https oder data:image) oder theme-basiertes Bild
     const imageSrc = this.backgroundimage && (this.backgroundimage.startsWith('http') || this.backgroundimage.startsWith('data:image/'))
       ? this.backgroundimage
@@ -325,21 +457,52 @@ export class GamePreview {
     return (
       <Host>
         <slot>
-          <svg width={this.width} height={this.height} viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <svg width={this.width} height={this.height} viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              {/* Filter Optionen - aktiviere eine davon */}
 
-            <rect width="400" height="400" fill="url(#bg-gradient)" />
-            {/* Hintergrundbild, falls vorhanden */}
+              {/* Option 1: Blur Filter (Unschärfe) */}
+              <filter id="light">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+              </filter>
 
-            <image width='400' height='400' href={imageSrc} />
+              {/* Option 2: Brightness + Blur (dunkler und unscharf) */}
+              <filter id="medium">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+                <feComponentTransfer>
+                  <feFuncR type="linear" slope="0.6" />
+                  <feFuncG type="linear" slope="0.6" />
+                  <feFuncB type="linear" slope="0.6" />
+                </feComponentTransfer>
+              </filter>
+
+              {/* Option 3: Starker Blur */}
+              <filter id="strong">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
+              </filter>
+
+            </defs>
+            {/* Hintergrundbild */}
+            <image width='1080' height='1350' href={imageSrc} filter={`url(#${this.getImageBlur()})`} />
+
+            {/* Blur Element for Background Image */}
+            {/* Option A: Halbtransparentes Overlay (kombinierbar mit Filtern oben) */}
+            {/* <rect width="1080" height="1350" fill="rgba(0, 0, 0, 0.3)" /> */}
+
+            {/* Option B: Gradient Overlay - auskommentieren zum Testen */}
+            {/* <rect width="1080" height="1350" fill="url(#overlayGradient)" /> */}
+
+            {/* Option C: Weißes Overlay für hellere Abschwächung */}
+            {/* <rect width="1080" height="1350" fill="rgba(255, 255, 255, 0.4)" /> */}
 
 
             {/* HOME GAME - groß und zentriert oben */}
-            <text x="200" y="70" font-family="Bebas Neue, sans-serif" font-size="80" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="1">
+            <text x="540" y="190" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="1">
               {this.getIsHomeGame() ? 'HOME GAME' : 'GAME DAY'}
             </text>
 
             {/* Datum, Uhrzeit und Ortschaft - zweite Zeile zentriert */}
-            <text x="200" y="90" font-family="Bebas Neue, sans-serif" font-size="18" fill="#fff" text-anchor="middle" font-weight="600">
+            <text x="540" y="243" font-family="Bebas Neue, sans-serif" font-size="49" fill="#fff" text-anchor="middle" font-weight="600">
               {this.date} {this.time} {this.location}
             </text>
 
@@ -348,12 +511,12 @@ export class GamePreview {
             {(this.game3 && this.game3.trim() !== '') && (
               <g>
                 {/* Home Team Logo (links) */}
-                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="165" width="70" height="70" href={this.teamHomeLogo} />
+                {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="27" y="750" width="189" height="189" href={this.teamHomeLogo} />
 
                 {/* Away Team Logo (rechts daneben) */}
-                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="165" width="70" height="70" href={this.teamAwayLogo} />
+                {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="243" y="750" width="189" height="189" href={this.teamAwayLogo} />
               </g>
             )}
 
@@ -361,24 +524,24 @@ export class GamePreview {
             {(this.game3 && this.game3.trim() !== '') && (
               <g>
                 {/* Home Team Logo (links) */}
-                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="245" width="70" height="70" href={this.teamHomeLogo2} />
+                {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="27" y="950" width="189" height="189" href={this.teamHomeLogo2} />
 
                 {/* Away Team Logo (rechts daneben) */}
-                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="245" width="70" height="70" href={this.teamAwayLogo2} />
+                {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="243" y="950" width="189" height="189" href={this.teamAwayLogo2} />
               </g>
             )}
             {/* 3 Multi GAME ModusTeam-Logos links unten Spiel 3 unten*/}
             {(this.game3 && this.game3.trim() !== '') && (
               <g>
                 {/* Home Team Logo (links) */}
-                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo3} />
+                {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="27" y="1150" width="189" height="189" href={this.teamHomeLogo3} />
 
                 {/* Away Team Logo (rechts daneben) */}
-                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo3} />
+                {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="243" y="1150" width="189" height="189" href={this.teamAwayLogo3} />
               </g>
             )}
 
@@ -388,12 +551,12 @@ export class GamePreview {
             {(this.game2 && this.game2.trim() !== '') && (!this.game3 || this.game3.trim() === '') && (
               <g>
                 {/* Home Team Logo (links) */}
-                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="245" width="70" height="70" href={this.teamHomeLogo} />
+                {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="27" y="950" width="189" height="189" href={this.teamHomeLogo} />
 
                 {/* Away Team Logo (rechts daneben) */}
-                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="245" width="70" height="70" href={this.teamAwayLogo} />
+                {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="243" y="950" width="189" height="189" href={this.teamAwayLogo} />
               </g>
             )}
 
@@ -401,12 +564,12 @@ export class GamePreview {
             {(this.game2 && this.game2.trim() !== '') && (!this.game3 || this.game3.trim() === '') && (
               <g>
                 {/* Home Team Logo (links) */}
-                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo2} />
+                {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="27" y="1150" width="189" height="189" href={this.teamHomeLogo2} />
 
                 {/* Away Team Logo (rechts daneben) */}
-                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo2} />
+                {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="243" y="1150" width="189" height="189" href={this.teamAwayLogo2} />
               </g>
             )}
 
@@ -416,18 +579,18 @@ export class GamePreview {
             {(!this.game2 || this.game2.trim() === '') && (!this.game3 || this.game3.trim() === '') && (
               <g>
                 {/* Home Team Logo (links) */}
-                {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="10" y="325" width="70" height="70" href={this.teamHomeLogo} />
+                {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="27" y="1150" width="189" height="189" href={this.teamHomeLogo} />
 
                 {/* Away Team Logo (rechts daneben) */}
-                {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                <image x="90" y="325" width="70" height="70" href={this.teamAwayLogo} />
+                {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                <image x="243" y="1150" width="189" height="189" href={this.teamAwayLogo} />
               </g>
             )}
 
             {/* Presented by myclub - unten rechts */}
-            <text x="390" y="390" font-family="Bebas Neue, sans-serif" font-size="12" fill="#fff" text-anchor="end" opacity="0.7">
-              presented by myclub
+            <text x="1060" y="1330" font-family="Bebas Neue, sans-serif" font-size="40" fill="#fff" text-anchor="end" opacity="0.7">
+              @getkanva.io
             </text>
           </svg>
         </slot>

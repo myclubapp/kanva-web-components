@@ -12,6 +12,10 @@ export namespace Components {
          */
         "backgroundimage": string;
         /**
+          * Club Id (used for type 'swisshandball' only)
+         */
+        "club": string;
+        /**
           * Game Id from my-club
          */
         "game": string;
@@ -25,14 +29,23 @@ export namespace Components {
         "game3": string;
         /**
           * Height of the preview
-          * @default '400'
+          * @default '1350'
          */
         "height": string;
+        /**
+          * Blur of the preview
+          * @default ''
+         */
+        "imageblur": string;
         /**
           * Is this a home game?
           * @default false
          */
         "ishomegame": boolean;
+        /**
+          * Team Id (used for type 'swissvolley' and 'swisshandball' only)
+         */
+        "team": string;
         /**
           * Theme of the preview
           * @default 'myclub'
@@ -45,7 +58,7 @@ export namespace Components {
         "type": string;
         /**
           * Width of the preview
-          * @default '400'
+          * @default '1080'
          */
         "width": string;
     }
@@ -54,6 +67,10 @@ export namespace Components {
           * Background image URL. Falls back to theme-based image if not provided.
          */
         "backgroundimage": string;
+        /**
+          * Club Id (used for type 'swisshandball' only)
+         */
+        "club": string;
         /**
           * Game Id from my-club
          */
@@ -64,14 +81,23 @@ export namespace Components {
         "game2": string;
         /**
           * Height of the preview
-          * @default '400'
+          * @default '1350'
          */
         "height": string;
+        /**
+          * Blur of the preview
+          * @default ''
+         */
+        "imageblur": string;
         /**
           * Show result detail
           * @default false
          */
         "showresultdetail": boolean;
+        /**
+          * Team Id (used for type 'swissvolley' and 'swisshandball' only)
+         */
+        "team": string;
         /**
           * Theme of the preview
           * @default 'myclub'
@@ -84,7 +110,7 @@ export namespace Components {
         "type": string;
         /**
           * Width of the preview
-          * @default '400'
+          * @default '1080'
          */
         "width": string;
     }
@@ -114,6 +140,10 @@ declare namespace LocalJSX {
          */
         "backgroundimage"?: string;
         /**
+          * Club Id (used for type 'swisshandball' only)
+         */
+        "club"?: string;
+        /**
           * Game Id from my-club
          */
         "game"?: string;
@@ -127,14 +157,23 @@ declare namespace LocalJSX {
         "game3"?: string;
         /**
           * Height of the preview
-          * @default '400'
+          * @default '1350'
          */
         "height"?: string;
+        /**
+          * Blur of the preview
+          * @default ''
+         */
+        "imageblur"?: string;
         /**
           * Is this a home game?
           * @default false
          */
         "ishomegame"?: boolean;
+        /**
+          * Team Id (used for type 'swissvolley' and 'swisshandball' only)
+         */
+        "team"?: string;
         /**
           * Theme of the preview
           * @default 'myclub'
@@ -147,7 +186,7 @@ declare namespace LocalJSX {
         "type"?: string;
         /**
           * Width of the preview
-          * @default '400'
+          * @default '1080'
          */
         "width"?: string;
     }
@@ -156,6 +195,10 @@ declare namespace LocalJSX {
           * Background image URL. Falls back to theme-based image if not provided.
          */
         "backgroundimage"?: string;
+        /**
+          * Club Id (used for type 'swisshandball' only)
+         */
+        "club"?: string;
         /**
           * Game Id from my-club
          */
@@ -166,14 +209,23 @@ declare namespace LocalJSX {
         "game2"?: string;
         /**
           * Height of the preview
-          * @default '400'
+          * @default '1350'
          */
         "height"?: string;
+        /**
+          * Blur of the preview
+          * @default ''
+         */
+        "imageblur"?: string;
         /**
           * Show result detail
           * @default false
          */
         "showresultdetail"?: boolean;
+        /**
+          * Team Id (used for type 'swissvolley' and 'swisshandball' only)
+         */
+        "team"?: string;
         /**
           * Theme of the preview
           * @default 'myclub'
@@ -186,7 +238,7 @@ declare namespace LocalJSX {
         "type"?: string;
         /**
           * Width of the preview
-          * @default '400'
+          * @default '1080'
          */
         "width"?: string;
     }

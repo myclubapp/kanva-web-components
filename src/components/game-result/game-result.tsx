@@ -23,11 +23,11 @@ export class GameResult {
   /**
    * Width of the preview
    */
-  @Prop() width: string = '400';
+  @Prop() width: string = '1080';
   /**
    * Height of the preview
    */
-  @Prop() height: string = '400';
+  @Prop() height: string = '1350';
   /**
    * Theme of the preview
    */
@@ -40,10 +40,22 @@ export class GameResult {
  * Show result detail
  */
   @Prop() showresultdetail: boolean = false;
+  /**
+ * Blur of the preview
+ */
+  @Prop() imageblur: string = ''; // light, medium, strong
 
   /**
-   * Name of the Game
+   * Team Id (used for type 'swissvolley' and 'swisshandball' only)
    */
+  @Prop() team: string;
+
+  /**
+   * Club Id (used for type 'swisshandball' only)
+   */
+  @Prop() club: string;
+
+
   @State() name: string;
   @State() description: string;
   @State() teamAway: string;
@@ -67,56 +79,15 @@ export class GameResult {
   @State() resultDetail2: string;
 
 
-  private getThemeStyles() {
-    switch (this.theme) {
-      case 'kadetten-unihockey':
-        return {
-          primaryColor: 'orange',
-          secondaryColor: 'black',
-          backgroundColor: '#f25528'
-        };
-      case 'myclub-light':
-        return {
-          primaryColor: '#339bde',
-          secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
-        };
-      case 'myclub-dark':
-        return {
-          primaryColor: '#795deb',
-          secondaryColor: '#339bde',
-          backgroundColor: '#1a1a1a'
-        };
-      case 'light':
-        return {
-          primaryColor: '#339bde',
-          secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
-        };
-      case 'dark':
-        return {
-          primaryColor: '#795deb',
-          secondaryColor: '#339bde',
-          backgroundColor: '#1a1a1a'
-        };
-      default:
-        return {
-          primaryColor: '#339bde',
-          secondaryColor: '#795deb',
-          backgroundColor: '#ffffff'
-        };
-    }
-  }
-
   private getDefaultBackgroundImage(): string {
     switch (this.theme) {
       case 'kadetten-unihockey':
         return 'kadetten-unihockey';
-      case 'myclub':
       case 'myclub-light':
+        return 'myclub-light';
       case 'myclub-dark':
-      case 'light':
-      case 'dark':
+        return 'myclub-dark';
+      case 'myclub':
       default:
         return 'myclub';
     }
@@ -130,6 +101,9 @@ export class GameResult {
     return this.game2;
   }
 
+  private getImageBlur(): string {
+    return this.imageblur;
+  }
 
   private getShowResultDetail(): boolean {
     return this.showresultdetail;
@@ -137,6 +111,14 @@ export class GameResult {
 
   private getType(): string {
     return this.type;
+  }
+
+  private getTeamId(): string {
+    return this.team;
+  }
+
+  private getClubId(): string {
+    return this.club;
   }
 
   private formatDate(dateString): string {
@@ -178,14 +160,156 @@ export class GameResult {
     return encodeURIComponent(query);
   }
 
+  private buildSwissVolleyTeamGamesQuery(teamId: string): string {
+    const query = `{
+  games(teamId: "${teamId}") {
+    id
+    date
+    time
+    location
+    city
+    teamHome
+    teamAway
+    teamHomeLogo
+    teamAwayLogo
+    result
+    resultDetail
+  }
+}`;
+    return encodeURIComponent(query);
+  }
+
+  private buildSwissHandballTeamClubGamesQuery(teamId: string, clubId: string): string {
+    const query = `{
+  games(teamId: "${teamId}", clubId: "${clubId}") {
+    id
+    teamHome
+    teamAway
+    teamHomeLogo
+    teamAwayLogo
+    date
+    time
+    result
+    resultDetail
+  }
+}`;
+    return encodeURIComponent(query);
+  }
+
+  private parseDateTime(dateStr: string, timeStr: string): Date {
+    if (!dateStr) return new Date(0);
+    const day = parseInt(dateStr.substr(0, 2), 10);
+    const month = parseInt(dateStr.substr(3, 2), 10) - 1;
+    const year = parseInt(dateStr.substr(6, 4), 10);
+    const [hoursStr, minutesStr] = (timeStr || '00:00').split(/[:.]/);
+    const hours = parseInt(hoursStr || '0', 10);
+    const minutes = parseInt(minutesStr || '0', 10);
+    return new Date(year, month, day, hours, minutes);
+  }
+
+  // Choose most recent past game for result; if none past, fallback to earliest
+  private selectSwissvolleyResultGame(games: any[]): any | null {
+    if (!Array.isArray(games) || games.length === 0) return null;
+    const now = new Date();
+    const withDate = games.map(g => ({
+      item: g,
+      dt: this.parseDateTime(g.date, g.time)
+    }));
+    const past = withDate.filter(x => x.dt.getTime() <= now.getTime());
+    const chosen = (past.length > 0
+      ? past.sort((a, b) => b.dt.getTime() - a.dt.getTime())[0]
+      : withDate.sort((a, b) => a.dt.getTime() - b.dt.getTime())[0]);
+    return chosen?.item || null;
+  }
+
   componentWillLoad() {
+    // swisshandball uses team+club-based games list
+    if (this.getType() === 'swisshandball' && this.getTeamId() && this.getClubId()) {
+      const teamClubQuery = this.buildSwissHandballTeamClubGamesQuery(this.getTeamId(), this.getClubId());
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/swisshandball?query=${teamClubQuery}`)
+        .then((response: Response) => response.json())
+        .then(response => {
+          // console.log(response);
+          const games = response.data?.games || [];
+          const byId = (id: string) => {
+            const targetId = this.extractGameId(id);
+            return games.find(g => this.extractGameId(String(g.id)) === targetId);
+          };
+          const primary = (this.game && this.game.trim() !== '') ? byId(this.game) : this.selectSwissvolleyResultGame(games);
+          if (primary) {
+            this.teamAway = primary.teamAway;
+            this.teamAwayLogo = primary.teamAwayLogo;
+            this.teamHome = primary.teamHome;
+            this.teamHomeLogo = primary.teamHomeLogo;
+            this.city = primary.city;
+            this.location = primary.location;
+            this.time = primary.time;
+            this.date = this.formatDate(primary.date);
+            this.result = primary.result;
+            this.resultDetail = primary.resultDetail;
+          }
+          if (this.game2 && this.game2.trim() !== '') {
+            const g2 = byId(this.game2);
+            if (g2) {
+              this.teamAway2 = g2.teamAway;
+              this.teamAwayLogo2 = g2.teamAwayLogo;
+              this.teamHome2 = g2.teamHome;
+              this.teamHomeLogo2 = g2.teamHomeLogo;
+              this.result2 = g2.result;
+              this.resultDetail2 = g2.resultDetail;
+            }
+          }
+        });
+      return;
+    }
+
+    // swissvolley uses team-based games list
+    if (this.getType() === 'swissvolley' && this.getTeamId()) {
+      const teamQuery = this.buildSwissVolleyTeamGamesQuery(this.getTeamId());
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/swissvolley?query=${teamQuery}`)
+        .then((response: Response) => response.json())
+        .then(response => {
+          // console.log(response);
+          const games = response.data?.games || [];
+          const byId = (id: string) => {
+            const targetId = this.extractGameId(id);
+            return games.find(g => this.extractGameId(String(g.id)) === targetId);
+          };
+          const primary = (this.game && this.game.trim() !== '') ? byId(this.game) : this.selectSwissvolleyResultGame(games);
+          if (primary) {
+            this.teamAway = primary.teamAway;
+            this.teamAwayLogo = primary.teamAwayLogo;
+            this.teamHome = primary.teamHome;
+            this.teamHomeLogo = primary.teamHomeLogo;
+            this.city = primary.city;
+            this.location = primary.location;
+            this.time = primary.time;
+            this.date = this.formatDate(primary.date);
+            this.result = primary.result;
+            this.resultDetail = primary.resultDetail;
+          }
+          if (this.game2 && this.game2.trim() !== '') {
+            const g2 = byId(this.game2);
+            if (g2) {
+              this.teamAway2 = g2.teamAway;
+              this.teamAwayLogo2 = g2.teamAwayLogo;
+              this.teamHome2 = g2.teamHome;
+              this.teamHomeLogo2 = g2.teamHomeLogo;
+              this.result2 = g2.result;
+              this.resultDetail2 = g2.resultDetail;
+            }
+          }
+        });
+      return;
+    }
+
     const gameId = this.extractGameId(this.getGameId());
     const graphQLQuery = this.buildGraphQLQuery(gameId);
 
     fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery}`)
       .then((response: Response) => response.json()
       ).then(response => {
-        console.log(response);
+        // console.log(response);
         const game = response.data?.game;
         if (game) {
           this.name = game.name;
@@ -212,7 +336,7 @@ export class GameResult {
       fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery2}`)
         .then((response2: Response) => response2.json()
         ).then(response2 => {
-          console.log(response2, '2nd game');
+          // console.log(response2, '2nd game');
           const game2 = response2.data?.game;
           if (game2) {
             this.teamAway2 = game2.teamAway;
@@ -305,8 +429,6 @@ export class GameResult {
   }
 
   render() {
-    // Layout basierend auf Instagram-Vorlagen
-    const themeStyles = this.getThemeStyles();
     // Entweder URL (http/https oder data:image) oder theme-basiertes Bild
     const imageSrc = this.backgroundimage && (this.backgroundimage.startsWith('http') || this.backgroundimage.startsWith('data:image/'))
       ? this.backgroundimage
@@ -316,34 +438,56 @@ export class GameResult {
     return (
       <Host>
         <slot>
-          <svg width={this.width} height={this.height} viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-            <rect width="400" height="400" fill="url(#bg-gradient)" />
-            {/* Hintergrundbild, falls vorhanden */}
+          <svg width={this.width} height={this.height} viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              {/* Filter Optionen - aktiviere eine davon */}
 
-            <image width='400' height='400' href={imageSrc} />
+              {/* Option 1: Blur Filter (Unschärfe) */}
+              <filter id="light">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+              </filter>
+
+              {/* Option 2: Brightness + Blur (dunkler und unscharf) */}
+              <filter id="medium">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+                <feComponentTransfer>
+                  <feFuncR type="linear" slope="0.6" />
+                  <feFuncG type="linear" slope="0.6" />
+                  <feFuncB type="linear" slope="0.6" />
+                </feComponentTransfer>
+              </filter>
+
+              {/* Option 3: Starker Blur */}
+              <filter id="strong">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
+              </filter>
+
+            </defs>
+            {/* Hintergrundbild */}
+            <image width='1080' height='1350' href={imageSrc} filter={`url(#${this.getImageBlur()})`} />
 
             {(!this.game2 || this.game2.trim() === '') && (
               <g>
                 {/* ONE GAME LAYOUT */}
 
                 {/* RESULT - groß und zentriert oben */}
-                <text x="10" y="390" font-family="Bebas Neue, sans-serif" font-size="150" fill="#fff" text-anchor="start" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="6" paint-order="stroke fill">
+                <text x="27" y="1323" font-family="Bebas Neue, sans-serif" font-size="405" fill="#fff" text-anchor="start" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="16" paint-order="stroke fill">
                   {this.result}
                 </text>
                 {this.getShowResultDetail() && (
-                  <text x="180" y="390" font-family="Bebas Neue, sans-serif" font-size="30" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="1" paint-order="stroke fill">
+                  <text x="486" y="1323" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
                     {this.resultDetail}
                   </text>
                 )}
                 {/* Team-Logos links unten nebeneinander */}
                 <g>
                   {/* Home Team Logo (links) */}
-                  {/*<rect x="10" y="325" width="70" height="70" rx="0" fill="#fff" filter="url(#shadow)" />*/}
-                  <image x="240" y="5" width="70" height="70" href={this.teamHomeLogo} />
+                  {/*<rect x="27" y="1097" width="189" height="189" rx="0" fill="#fff" filter="url(#shadow)" />*/}
+                  <image x="648" y="14" width="189" height="189" href={this.teamHomeLogo} />
 
                   {/* Away Team Logo (rechts daneben) */}
-                  {/*<rect x="120" y="300" width="80" height="80" rx="12" fill="#fff" filter="url(#shadow)" />*/}
-                  <image x="320" y="5" width="70" height="70" href={this.teamAwayLogo} />
+                  {/*<rect x="324" y="1013" width="216" height="216" rx="32" fill="#fff" filter="url(#shadow)" />*/}
+                  <image x="864" y="14" width="189" height="189" href={this.teamAwayLogo} />
                 </g>
               </g>
             )}
@@ -353,27 +497,27 @@ export class GameResult {
                 {/* TWO GAMES LAYOUT */}
                 {this.game2 !== null && (
                   <g> {/* First Game */}
-                    <image x="20" y="80" width="40" height="40" href={this.teamHomeLogo} />
-                    <image x="90" y="80" width="40" height="40" href={this.teamAwayLogo} />
-                    <text x="70" y="190" font-family="Bebas Neue, sans-serif" font-size="80" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="4" paint-order="stroke fill">
+                    <image x="54" y="351" width="108" height="108" href={this.teamHomeLogo} />
+                    <image x="243" y="351" width="108" height="108" href={this.teamAwayLogo} />
+                    <text x="189" y="648" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
                       {this.result}
                     </text>
                     {this.getShowResultDetail() && (
-                      <text x="140" y="190" font-family="Bebas Neue, sans-serif" font-size="30" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="1" paint-order="stroke fill">
+                      <text x="378" y="648" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
                         {this.resultDetail}
                       </text>
                     )}
                   </g>
                 )}
-                <line x1="10" y1="200" x2="140" y2="200" stroke="#fff" stroke-width="2" />
+                <line x1="27" y1="675" x2="378" y2="675" stroke="#fff" stroke-width="5" />
                 <g> {/* Second Game */}
-                  <image x="20" y="280" width="40" height="40" href={this.teamHomeLogo2} />
-                  <image x="90" y="280" width="40" height="40" href={this.teamAwayLogo2} />
-                  <text x="70" y="270" font-family="Bebas Neue, sans-serif" font-size="80" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="4" paint-order="stroke fill">
+                  <image x="54" y="891" width="108" height="108" href={this.teamHomeLogo2} />
+                  <image x="243" y="891" width="108" height="108" href={this.teamAwayLogo2} />
+                  <text x="189" y="864" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
                     {this.result2}
                   </text>
                   {this.getShowResultDetail() && (
-                    <text x="140" y="235" font-family="Bebas Neue, sans-serif" font-size="30" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="1" paint-order="stroke fill">
+                    <text x="378" y="770" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
                       {this.resultDetail2}
                     </text>
                   )}
@@ -383,8 +527,8 @@ export class GameResult {
 
 
             {/* Presented by myclub - unten rechts */}
-            <text x="390" y="390" font-family="Bebas Neue, sans-serif" font-size="12" fill="#fff" text-anchor="end" opacity="0.7">
-              presented by myclub
+            <text x="1060" y="1330" font-family="Bebas Neue, sans-serif" font-size="40" fill="#fff" text-anchor="end" opacity="0.7">
+            @getkanva.io
             </text>
           </svg>
         </slot>

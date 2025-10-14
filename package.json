@@ -1,7 +1,7 @@
 {
   "name": "myclub-game-preview",
-  "version": "1.2.9",
-  "description": "FanPost - Das Social Media Tool für Sportvereine",
+  "version": "1.4.5",
+  "description": "KANVA - Das Social Media Tool für Sportvereine",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -14,10 +14,10 @@
     "game-result",
     "social-media",
     "sport",
-    "fanpost"
+    "kanva"
   ],
-  "homepage": "https://fanpost.my-club.app",
-  "author": "myclub app",
+  "homepage": "https://getkanva.io",
+  "author": "KANVA",
   "exports": {
     ".": {
       "import": "./dist/myclub-game-preview/myclub-game-preview.esm.js",

@@ -10,14 +10,17 @@
 | Property          | Attribute         | Description                                                            | Type      | Default            |
 | ----------------- | ----------------- | ---------------------------------------------------------------------- | --------- | ------------------ |
 | `backgroundimage` | `backgroundimage` | Background image URL. Falls back to theme-based image if not provided. | `string`  | `undefined`        |
+| `club`            | `club`            | Club Id (used for type 'swisshandball' only)                           | `string`  | `undefined`        |
 | `game`            | `game`            | Game Id from my-club                                                   | `string`  | `undefined`        |
 | `game2`           | `game-2`          | Game Id from my-club for 2nd game                                      | `string`  | `undefined`        |
 | `game3`           | `game-3`          | Game Id from my-club for 3rd game                                      | `string`  | `undefined`        |
-| `height`          | `height`          | Height of the preview                                                  | `string`  | `'400'`            |
+| `height`          | `height`          | Height of the preview                                                  | `string`  | `'1350'`           |
+| `imageblur`       | `imageblur`       | Blur of the preview                                                    | `string`  | `''`               |
 | `ishomegame`      | `ishomegame`      | Is this a home game?                                                   | `boolean` | `false`            |
+| `team`            | `team`            | Team Id (used for type 'swissvolley' and 'swisshandball' only)         | `string`  | `undefined`        |
 | `theme`           | `theme`           | Theme of the preview                                                   | `string`  | `'myclub'`         |
 | `type`            | `type`            | CLub type                                                              | `string`  | `'swissunihockey'` |
-| `width`           | `width`           | Width of the preview                                                   | `string`  | `'400'`            |
+| `width`           | `width`           | Width of the preview                                                   | `string`  | `'1080'`           |
 
 
 ----------------------------------------------
