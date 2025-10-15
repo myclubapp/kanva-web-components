@@ -17,7 +17,7 @@
 | `imageblur`        | `imageblur`        | Blur of the preview                                                    | `string`  | `''`               |
 | `showresultdetail` | `showresultdetail` | Show result detail                                                     | `boolean` | `false`            |
 | `team`             | `team`             | Team Id (used for type 'swissvolley' and 'swisshandball' only)         | `string`  | `undefined`        |
-| `theme`            | `theme`            | Theme of the preview                                                   | `string`  | `'myclub'`         |
+| `theme`            | `theme`            | Theme of the preview                                                   | `string`  | `'kanva'`          |
 | `type`             | `type`             | CLub type                                                              | `string`  | `'swissunihockey'` |
 | `width`            | `width`            | Width of the preview                                                   | `string`  | `'1080'`           |
 
