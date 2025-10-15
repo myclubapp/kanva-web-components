@@ -1,27 +1,26 @@
 {
-  "name": "myclub-game-preview",
-  "version": "1.4.5",
+  "name": "kanva-web-components",
+  "version": "1.5.0",
   "description": "KANVA - Das Social Media Tool für Sportvereine",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
-  "unpkg": "dist/myclub-game-preview/myclub-game-preview.esm.js",
+  "unpkg": "dist/kanva-web-components/kanva-web-components.esm.js",
   "keywords": [
-    "myclub",
-    "game-preview",
-    "game-result",
     "social-media",
     "sport",
-    "kanva"
+    "kanva",
+    "whatsapp",
+    "instagram"
   ],
   "homepage": "https://getkanva.io",
   "author": "KANVA",
   "exports": {
     ".": {
-      "import": "./dist/myclub-game-preview/myclub-game-preview.esm.js",
-      "require": "./dist/myclub-game-preview/myclub-game-preview.cjs.js"
+      "import": "./dist/kanva-web-components/kanva-web-components.esm.js",
+      "require": "./dist/kanva-web-components/kanva-web-components.cjs.js"
     },
     "./game-preview": {
       "import": "./dist/components/game-preview.js",
@@ -39,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/myclubapp/create-game-preview.git"
+    "url": "https://github.com/myclubapp/kanva-web-components.git"
   },
   "files": [
     "dist/",

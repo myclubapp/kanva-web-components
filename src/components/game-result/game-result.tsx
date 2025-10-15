@@ -1,4 +1,13 @@
-import { Component, Host, Prop, State, h, getAssetPath } from '@stencil/core';
+import { Component, Host, Prop, State, h } from '@stencil/core';
+import {
+  formatDate,
+  extractGameId,
+  buildGraphQLQuery,
+  buildSwissVolleyTeamGamesQuery,
+  buildSwissHandballTeamClubGamesQuery,
+  parseDateTime,
+  getBackgroundImageSrc
+} from '../../utils/utils';
 
 @Component({
   tag: 'game-result',
@@ -31,7 +40,7 @@ export class GameResult {
   /**
    * Theme of the preview
    */
-  @Prop() theme: string = 'myclub';
+  @Prop() theme: string = 'kanva';
   /**
    * Background image URL. Falls back to theme-based image if not provided.
    */
@@ -79,20 +88,6 @@ export class GameResult {
   @State() resultDetail2: string;
 
 
-  private getDefaultBackgroundImage(): string {
-    switch (this.theme) {
-      case 'kadetten-unihockey':
-        return 'kadetten-unihockey';
-      case 'myclub-light':
-        return 'myclub-light';
-      case 'myclub-dark':
-        return 'myclub-dark';
-      case 'myclub':
-      default:
-        return 'myclub';
-    }
-  }
-
   private getGameId(): string {
     return this.game;
   }
@@ -121,99 +116,13 @@ export class GameResult {
     return this.club;
   }
 
-  private formatDate(dateString): string {
-    // 	"15.05.2022"
-
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString
-
-    let date = new Date(dateString.substr(6, 4), dateString.substr(3, 2) - 1, dateString.substr(0, 2)).toLocaleDateString('ch-DE', {
-      // weekday: 'long',
-      year: '2-digit',
-      month: 'numeric',
-      day: 'numeric',
-    });
-    return date;
-  }
-
-  private extractGameId(gameId: string): string {
-    // Extrahiert die reine Nummer aus der gameId (z.B. "su-1076712" -> "1076712")
-    if (!gameId) return '';
-    const match = gameId.match(/\d+/);
-    return match ? match[0] : gameId;
-  }
-
-  private buildGraphQLQuery(gameId: string): string {
-    const query = `{
-  game(gameId: "${gameId}") {
-    date
-    time
-    location
-    city
-    teamHome
-    teamAway
-    teamHomeLogo
-    teamAwayLogo
-    result
-    resultDetail
-  }
-}`;
-    return encodeURIComponent(query);
-  }
-
-  private buildSwissVolleyTeamGamesQuery(teamId: string): string {
-    const query = `{
-  games(teamId: "${teamId}") {
-    id
-    date
-    time
-    location
-    city
-    teamHome
-    teamAway
-    teamHomeLogo
-    teamAwayLogo
-    result
-    resultDetail
-  }
-}`;
-    return encodeURIComponent(query);
-  }
-
-  private buildSwissHandballTeamClubGamesQuery(teamId: string, clubId: string): string {
-    const query = `{
-  games(teamId: "${teamId}", clubId: "${clubId}") {
-    id
-    teamHome
-    teamAway
-    teamHomeLogo
-    teamAwayLogo
-    date
-    time
-    result
-    resultDetail
-  }
-}`;
-    return encodeURIComponent(query);
-  }
-
-  private parseDateTime(dateStr: string, timeStr: string): Date {
-    if (!dateStr) return new Date(0);
-    const day = parseInt(dateStr.substr(0, 2), 10);
-    const month = parseInt(dateStr.substr(3, 2), 10) - 1;
-    const year = parseInt(dateStr.substr(6, 4), 10);
-    const [hoursStr, minutesStr] = (timeStr || '00:00').split(/[:.]/);
-    const hours = parseInt(hoursStr || '0', 10);
-    const minutes = parseInt(minutesStr || '0', 10);
-    return new Date(year, month, day, hours, minutes);
-  }
-
   // Choose most recent past game for result; if none past, fallback to earliest
   private selectSwissvolleyResultGame(games: any[]): any | null {
     if (!Array.isArray(games) || games.length === 0) return null;
     const now = new Date();
     const withDate = games.map(g => ({
       item: g,
-      dt: this.parseDateTime(g.date, g.time)
+      dt: parseDateTime(g.date, g.time)
     }));
     const past = withDate.filter(x => x.dt.getTime() <= now.getTime());
     const chosen = (past.length > 0
@@ -225,15 +134,15 @@ export class GameResult {
   componentWillLoad() {
     // swisshandball uses team+club-based games list
     if (this.getType() === 'swisshandball' && this.getTeamId() && this.getClubId()) {
-      const teamClubQuery = this.buildSwissHandballTeamClubGamesQuery(this.getTeamId(), this.getClubId());
+      const teamClubQuery = buildSwissHandballTeamClubGamesQuery(this.getTeamId(), this.getClubId());
       fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/swisshandball?query=${teamClubQuery}`)
         .then((response: Response) => response.json())
         .then(response => {
           // console.log(response);
           const games = response.data?.games || [];
           const byId = (id: string) => {
-            const targetId = this.extractGameId(id);
-            return games.find(g => this.extractGameId(String(g.id)) === targetId);
+            const targetId = extractGameId(id);
+            return games.find(g => extractGameId(String(g.id)) === targetId);
           };
           const primary = (this.game && this.game.trim() !== '') ? byId(this.game) : this.selectSwissvolleyResultGame(games);
           if (primary) {
@@ -244,7 +153,7 @@ export class GameResult {
             this.city = primary.city;
             this.location = primary.location;
             this.time = primary.time;
-            this.date = this.formatDate(primary.date);
+            this.date = formatDate(primary.date);
             this.result = primary.result;
             this.resultDetail = primary.resultDetail;
           }
@@ -265,15 +174,15 @@ export class GameResult {
 
     // swissvolley uses team-based games list
     if (this.getType() === 'swissvolley' && this.getTeamId()) {
-      const teamQuery = this.buildSwissVolleyTeamGamesQuery(this.getTeamId());
+      const teamQuery = buildSwissVolleyTeamGamesQuery(this.getTeamId());
       fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/swissvolley?query=${teamQuery}`)
         .then((response: Response) => response.json())
         .then(response => {
           // console.log(response);
           const games = response.data?.games || [];
           const byId = (id: string) => {
-            const targetId = this.extractGameId(id);
-            return games.find(g => this.extractGameId(String(g.id)) === targetId);
+            const targetId = extractGameId(id);
+            return games.find(g => extractGameId(String(g.id)) === targetId);
           };
           const primary = (this.game && this.game.trim() !== '') ? byId(this.game) : this.selectSwissvolleyResultGame(games);
           if (primary) {
@@ -284,7 +193,7 @@ export class GameResult {
             this.city = primary.city;
             this.location = primary.location;
             this.time = primary.time;
-            this.date = this.formatDate(primary.date);
+            this.date = formatDate(primary.date);
             this.result = primary.result;
             this.resultDetail = primary.resultDetail;
           }
@@ -303,8 +212,8 @@ export class GameResult {
       return;
     }
 
-    const gameId = this.extractGameId(this.getGameId());
-    const graphQLQuery = this.buildGraphQLQuery(gameId);
+    const gameId = extractGameId(this.getGameId());
+    const graphQLQuery = buildGraphQLQuery(gameId);
 
     fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery}`)
       .then((response: Response) => response.json()
@@ -321,7 +230,7 @@ export class GameResult {
           this.city = game.city;
           this.location = game.location;
           this.time = game.time;
-          this.date = this.formatDate(game.date);
+          this.date = formatDate(game.date);
 
           this.result = game.result;
           this.resultDetail = game.resultDetail;
@@ -330,8 +239,8 @@ export class GameResult {
 
 
     if (this.game2 && this.game2.trim() !== '') {
-      const gameId2 = this.extractGameId(this.getGameId2());
-      const graphQLQuery2 = this.buildGraphQLQuery(gameId2);
+      const gameId2 = extractGameId(this.getGameId2());
+      const graphQLQuery2 = buildGraphQLQuery(gameId2);
 
       fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery2}`)
         .then((response2: Response) => response2.json()
@@ -429,10 +338,7 @@ export class GameResult {
   }
 
   render() {
-    // Entweder URL (http/https oder data:image) oder theme-basiertes Bild
-    const imageSrc = this.backgroundimage && (this.backgroundimage.startsWith('http') || this.backgroundimage.startsWith('data:image/'))
-      ? this.backgroundimage
-      : getAssetPath(`./assets/background-${this.getDefaultBackgroundImage()}.png`);
+    const imageSrc = getBackgroundImageSrc(this.backgroundimage, this.theme);
     // eslint-disable-next-line
 
     return (

@@ -48,7 +48,7 @@ export namespace Components {
         "team": string;
         /**
           * Theme of the preview
-          * @default 'myclub'
+          * @default 'kanva'
          */
         "theme": string;
         /**
@@ -100,7 +100,7 @@ export namespace Components {
         "team": string;
         /**
           * Theme of the preview
-          * @default 'myclub'
+          * @default 'kanva'
          */
         "theme": string;
         /**
@@ -176,7 +176,7 @@ declare namespace LocalJSX {
         "team"?: string;
         /**
           * Theme of the preview
-          * @default 'myclub'
+          * @default 'kanva'
          */
         "theme"?: string;
         /**
@@ -228,7 +228,7 @@ declare namespace LocalJSX {
         "team"?: string;
         /**
           * Theme of the preview
-          * @default 'myclub'
+          * @default 'kanva'
          */
         "theme"?: string;
         /**

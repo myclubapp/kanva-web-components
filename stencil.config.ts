@@ -1,7 +1,7 @@
 import { Config } from '@stencil/core';
 
 export const config: Config = {
-  namespace: 'myclub-game-preview',
+  namespace: 'kanva-web-components',
   outputTargets: [
     {
       type: 'dist',
