@@ -362,6 +362,7 @@ export class GamePreview {
         <slot>
           <svg width={this.width} height={this.height} viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
             <defs>
+
               {/* Filter Optionen - aktiviere eine davon */}
 
               {/* Option 1: Blur Filter (Unschärfe) */}
@@ -405,7 +406,7 @@ export class GamePreview {
             </text>
 
             {/* Datum, Uhrzeit und Ortschaft - zweite Zeile zentriert */}
-            <text x="540" y="243" font-family="Bebas Neue, sans-serif" font-size="49" fill="#fff" text-anchor="middle" font-weight="600">
+            <text x="540" y="243" font-family="Bebas Neue, sans-serif" font-size="49" fill="#fff" text-anchor="middle" font-weight="700">
               {this.date} {this.time} {this.location}
             </text>
 

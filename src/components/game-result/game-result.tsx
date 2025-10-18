@@ -346,6 +346,8 @@ export class GameResult {
         <slot>
           <svg width={this.width} height={this.height} viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
             <defs>
+       
+
               {/* Filter Optionen - aktiviere eine davon */}
 
               {/* Option 1: Blur Filter (Unschärfe) */}
