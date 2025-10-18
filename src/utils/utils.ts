@@ -144,3 +144,32 @@ export function getBackgroundImageSrc(backgroundimage: string | undefined, theme
   }
   return getAssetPath(`./assets/background-${getDefaultBackgroundImage(theme)}.png`);
 }
+
+/**
+ * Dynamically loads Google Fonts for the component
+ * This ensures fonts are available without requiring HTML modifications
+ */
+export function loadGoogleFonts(): void {
+  // Check if fonts are already loaded
+  if (document.querySelector('link[href*="fonts.googleapis.com"]')) {
+    return;
+  }
+
+  // Create preconnect links for better performance
+  const preconnectGoogle = document.createElement('link');
+  preconnectGoogle.rel = 'preconnect';
+  preconnectGoogle.href = 'https://fonts.googleapis.com';
+  document.head.appendChild(preconnectGoogle);
+
+  const preconnectGstatic = document.createElement('link');
+  preconnectGstatic.rel = 'preconnect';
+  preconnectGstatic.href = 'https://fonts.gstatic.com';
+  preconnectGstatic.crossOrigin = 'anonymous';
+  document.head.appendChild(preconnectGstatic);
+
+  // Load Bebas Neue font
+  const fontLink = document.createElement('link');
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
+  fontLink.rel = 'stylesheet';
+  document.head.appendChild(fontLink);
+}

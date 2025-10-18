@@ -6,7 +6,8 @@ import {
   buildSwissVolleyTeamGamesQuery,
   buildSwissHandballTeamClubGamesQuery,
   parseDateTime,
-  getBackgroundImageSrc
+  getBackgroundImageSrc,
+  loadGoogleFonts
 } from '../../utils/utils';
 
 @Component({
@@ -132,6 +133,8 @@ export class GameResult {
   }
 
   componentWillLoad() {
+    // Load Google Fonts dynamically
+    loadGoogleFonts();
     // swisshandball uses team+club-based games list
     if (this.getType() === 'swisshandball' && this.getTeamId() && this.getClubId()) {
       const teamClubQuery = buildSwissHandballTeamClubGamesQuery(this.getTeamId(), this.getClubId());
