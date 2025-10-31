@@ -15,7 +15,6 @@
 | `game2`           | `game-2`          | Game Id from my-club for 2nd game                                      | `string`  | `undefined`        |
 | `game3`           | `game-3`          | Game Id from my-club for 3rd game                                      | `string`  | `undefined`        |
 | `height`          | `height`          | Height of the preview                                                  | `string`  | `'1350'`           |
-| `imageblur`       | `imageblur`       | Blur of the preview                                                    | `string`  | `''`               |
 | `ishomegame`      | `ishomegame`      | Is this a home game?                                                   | `boolean` | `false`            |
 | `team`            | `team`            | Team Id (used for type 'swissvolley' and 'swisshandball' only)         | `string`  | `undefined`        |
 | `theme`           | `theme`           | Theme of the preview                                                   | `string`  | `'kanva'`          |

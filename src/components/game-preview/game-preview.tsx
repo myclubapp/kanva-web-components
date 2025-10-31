@@ -53,10 +53,6 @@ export class GamePreview {
    * Background image URL. Falls back to theme-based image if not provided.
    */
   @Prop() backgroundimage: string;
-  /**
-   * Blur of the preview
-   */
-  @Prop() imageblur: string = ''; // light, medium, strong
 
   /**
    * Team Id (used for type 'swissvolley' and 'swisshandball' only)
@@ -106,10 +102,6 @@ export class GamePreview {
 
   private getClubId(): string {
     return this.club;
-  }
-
-  private getImageBlur(): string {
-    return this.imageblur;
   }
 
   private getType(): string {
@@ -364,33 +356,24 @@ export class GamePreview {
       <Host>
         <slot>
           <svg width={this.width} height={this.height} viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-
-              {/* Filter Optionen - aktiviere eine davon */}
-
-              {/* Option 1: Blur Filter (Unschärfe) */}
-              <filter id="light">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
-              </filter>
-
-              {/* Option 2: Brightness + Blur (dunkler und unscharf) */}
-              <filter id="medium">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-                <feComponentTransfer>
-                  <feFuncR type="linear" slope="0.6" />
-                  <feFuncG type="linear" slope="0.6" />
-                  <feFuncB type="linear" slope="0.6" />
-                </feComponentTransfer>
-              </filter>
-
-              {/* Option 3: Starker Blur */}
-              <filter id="strong">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
-              </filter>
-
-            </defs>
             {/* Hintergrundbild */}
-            <image width='1080' height='1350' href={imageSrc} filter={`url(#${this.getImageBlur()})`} />
+            <foreignObject width='1080' height='1350' x='0' y='0'>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden'
+              }}>
+                <img
+                  src={imageSrc}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  alt="Background"
+                />
+              </div>
+            </foreignObject>
 
             {/* Blur Element for Background Image */}
             {/* Option A: Halbtransparentes Overlay (kombinierbar mit Filtern oben) */}
