@@ -357,23 +357,14 @@ export class GamePreview {
         <slot>
           <svg width={this.width} height={this.height} viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
             {/* Hintergrundbild */}
-            <foreignObject width='1080' height='1350' x='0' y='0'>
-              <div style={{
-                width: '100%',
-                height: '100%',
-                overflow: 'hidden'
-              }}>
-                <img
-                  src={imageSrc}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                  alt="Background"
-                />
-              </div>
-            </foreignObject>
+            <image
+              href={imageSrc}
+              x="0"
+              y="0"
+              width="1080"
+              height="1350"
+              preserveAspectRatio="xMidYMid slice"
+            />
 
             {/* Blur Element for Background Image */}
             {/* Option A: Halbtransparentes Overlay (kombinierbar mit Filtern oben) */}
