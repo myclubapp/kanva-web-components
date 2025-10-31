@@ -31,6 +31,10 @@ export class GameResult {
    */
   @Prop() game2: string;
   /**
+   * Game Id from my-club for 3rd game
+   */
+  @Prop() game3: string;
+  /**
    * Width of the preview
    */
   @Prop() width: string = '1080';
@@ -83,6 +87,15 @@ export class GameResult {
   @State() teamHomeLogo2: string;
   @State() result2: string;
   @State() resultDetail2: string;
+  /**
+   * Game 3 Attributes
+   */
+  @State() teamAway3: string;
+  @State() teamAwayLogo3: string;
+  @State() teamHome3: string;
+  @State() teamHomeLogo3: string;
+  @State() result3: string;
+  @State() resultDetail3: string;
 
 
   private getGameId(): string {
@@ -91,6 +104,14 @@ export class GameResult {
 
   private getGameId2(): string {
     return this.game2;
+  }
+
+  private getGameId3(): string {
+    return this.game3;
+  }
+
+  private getImageBlur(): string {
+    return this.imageblur;
   }
 
   private getShowResultDetail(): boolean {
@@ -163,6 +184,17 @@ export class GameResult {
               this.resultDetail2 = g2.resultDetail;
             }
           }
+          if (this.game3 && this.game3.trim() !== '') {
+            const g3 = byId(this.game3);
+            if (g3) {
+              this.teamAway3 = g3.teamAway;
+              this.teamAwayLogo3 = g3.teamAwayLogo;
+              this.teamHome3 = g3.teamHome;
+              this.teamHomeLogo3 = g3.teamHomeLogo;
+              this.result3 = g3.result;
+              this.resultDetail3 = g3.resultDetail;
+            }
+          }
         });
       return;
     }
@@ -201,6 +233,17 @@ export class GameResult {
               this.teamHomeLogo2 = g2.teamHomeLogo;
               this.result2 = g2.result;
               this.resultDetail2 = g2.resultDetail;
+            }
+          }
+          if (this.game3 && this.game3.trim() !== '') {
+            const g3 = byId(this.game3);
+            if (g3) {
+              this.teamAway3 = g3.teamAway;
+              this.teamAwayLogo3 = g3.teamAwayLogo;
+              this.teamHome3 = g3.teamHome;
+              this.teamHomeLogo3 = g3.teamHomeLogo;
+              this.result3 = g3.result;
+              this.resultDetail3 = g3.resultDetail;
             }
           }
         });
@@ -249,6 +292,26 @@ export class GameResult {
             this.teamHomeLogo2 = game2.teamHomeLogo;
             this.result2 = game2.result;
             this.resultDetail2 = game2.resultDetail;
+          }
+        });
+    }
+
+    if (this.game3 && this.game3.trim() !== '') {
+      const gameId3 = extractGameId(this.getGameId3());
+      const graphQLQuery3 = buildGraphQLQuery(gameId3);
+
+      fetch(`https://europe-west6-myclubmanagement.cloudfunctions.net/api/${this.getType()}?query=${graphQLQuery3}`)
+        .then((response3: Response) => response3.json()
+        ).then(response3 => {
+          // console.log(response3, '3rd game');
+          const game3 = response3.data?.game;
+          if (game3) {
+            this.teamAway3 = game3.teamAway;
+            this.teamAwayLogo3 = game3.teamAwayLogo;
+            this.teamHome3 = game3.teamHome;
+            this.teamHomeLogo3 = game3.teamHomeLogo;
+            this.result3 = game3.result;
+            this.resultDetail3 = game3.resultDetail;
           }
         });
     }
@@ -376,32 +439,73 @@ export class GameResult {
               </g>
             )}
 
-            {(this.game2 && this.game2.trim() !== '') && (
+            {/* THREE GAMES LAYOUT */}
+            {(this.game3 && this.game3.trim() !== '') && (
               <g>
-                {/* TWO GAMES LAYOUT */}
-                {this.game2 !== null && (
-                  <g> {/* First Game */}
-                    <image x="54" y="351" width="108" height="108" href={this.teamHomeLogo} />
-                    <image x="243" y="351" width="108" height="108" href={this.teamAwayLogo} />
-                    <text x="189" y="648" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
-                      {this.result}
+                <g> {/* First Game - Top Left */}
+                  <image x="54" y="351" width="108" height="108" href={this.teamHomeLogo} />
+                  <image x="243" y="351" width="108" height="108" href={this.teamAwayLogo} />
+                  <text x="189" y="648" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
+                    {this.result}
+                  </text>
+                  {this.getShowResultDetail() && (
+                    <text x="378" y="648" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
+                      {this.resultDetail}
                     </text>
-                    {this.getShowResultDetail() && (
-                      <text x="378" y="648" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
-                        {this.resultDetail}
-                      </text>
-                    )}
-                  </g>
-                )}
+                  )}
+                </g>
+                <line x1="27" y1="675" x2="1053" y2="675" stroke="#fff" stroke-width="5" />
+                <g> {/* Second Game - Bottom Center */}
+                  <image x="486" y="891" width="108" height="108" href={this.teamHomeLogo2} />
+                  <image x="675" y="891" width="108" height="108" href={this.teamAwayLogo2} />
+                  <text x="621" y="1188" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
+                    {this.result2}
+                  </text>
+                  {this.getShowResultDetail() && (
+                    <text x="810" y="1188" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
+                      {this.resultDetail2}
+                    </text>
+                  )}
+                </g>
+                <g> {/* Third Game - Top Right (same row as first) */}
+                  <image x="702" y="351" width="108" height="108" href={this.teamHomeLogo3} />
+                  <image x="891" y="351" width="108" height="108" href={this.teamAwayLogo3} />
+                  <text x="837" y="648" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
+                    {this.result3}
+                  </text>
+                  {this.getShowResultDetail() && (
+                    <text x="1026" y="648" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
+                      {this.resultDetail3}
+                    </text>
+                  )}
+                </g>
+              </g>
+            )}
+
+            {/* TWO GAMES LAYOUT */}
+            {(this.game2 && this.game2.trim() !== '') && (!this.game3 || this.game3.trim() === '') && (
+              <g>
+                <g> {/* First Game */}
+                  <image x="54" y="351" width="108" height="108" href={this.teamHomeLogo} />
+                  <image x="243" y="351" width="108" height="108" href={this.teamAwayLogo} />
+                  <text x="189" y="648" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
+                    {this.result}
+                  </text>
+                  {this.getShowResultDetail() && (
+                    <text x="378" y="648" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
+                      {this.resultDetail}
+                    </text>
+                  )}
+                </g>
                 <line x1="27" y1="675" x2="378" y2="675" stroke="#fff" stroke-width="5" />
                 <g> {/* Second Game */}
                   <image x="54" y="891" width="108" height="108" href={this.teamHomeLogo2} />
                   <image x="243" y="891" width="108" height="108" href={this.teamAwayLogo2} />
-                  <text x="189" y="864" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
+                  <text x="189" y="1188" font-family="Bebas Neue, sans-serif" font-size="216" fill="#fff" text-anchor="middle" font-weight="900" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="11" paint-order="stroke fill">
                     {this.result2}
                   </text>
                   {this.getShowResultDetail() && (
-                    <text x="378" y="770" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
+                    <text x="378" y="1188" font-family="Bebas Neue, sans-serif" font-size="81" fill="#fff" text-anchor="start" font-weight="400" letter-spacing="0" font-style="italic" stroke="#fff" stroke-width="3" paint-order="stroke fill">
                       {this.resultDetail2}
                     </text>
                   )}
