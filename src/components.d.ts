@@ -33,11 +33,6 @@ export namespace Components {
          */
         "height": string;
         /**
-          * Blur of the preview
-          * @default ''
-         */
-        "imageblur": string;
-        /**
           * Is this a home game?
           * @default false
          */
@@ -84,11 +79,6 @@ export namespace Components {
           * @default '1350'
          */
         "height": string;
-        /**
-          * Blur of the preview
-          * @default ''
-         */
-        "imageblur": string;
         /**
           * Show result detail
           * @default false
@@ -161,11 +151,6 @@ declare namespace LocalJSX {
          */
         "height"?: string;
         /**
-          * Blur of the preview
-          * @default ''
-         */
-        "imageblur"?: string;
-        /**
           * Is this a home game?
           * @default false
          */
@@ -212,11 +197,6 @@ declare namespace LocalJSX {
           * @default '1350'
          */
         "height"?: string;
-        /**
-          * Blur of the preview
-          * @default ''
-         */
-        "imageblur"?: string;
         /**
           * Show result detail
           * @default false
